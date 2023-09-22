@@ -853,7 +853,7 @@ public enum CollisionData {
         }
 
         switch (data.getFace()) {
-            case Face.CEILING:
+            case CEILING:
                 switch (data.getFacing()) {
                     case WEST:
                     case EAST:
@@ -862,7 +862,7 @@ public enum CollisionData {
                     case SOUTH:
                         return new SimpleCollisionBox(0.3125, 1.0 - f2, 0.375, 0.6875, 1.0, 0.625, false);
                 }
-            case Face.FLOOR:
+            case FLOOR:
                 switch (data.getFacing()) {
                     case WEST:
                     case EAST:
@@ -871,7 +871,7 @@ public enum CollisionData {
                     case SOUTH:
                         return new SimpleCollisionBox(0.3125, 0.0, 0.375, 0.6875, 0.0 + f2, 0.625, false);
                 }
-            case Face.WALL:
+            case WALL:
                 switch (data.getFacing()) {
                     case WEST:
                         return new SimpleCollisionBox(1.0 - f2, 0.375, 0.3125, 1.0, 0.625, 0.6875, false);
