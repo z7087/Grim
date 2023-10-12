@@ -189,7 +189,8 @@ public class CheckManagerListener extends PacketListenerAbstract {
             // Less than 15 milliseconds ago means this is likely (fix all look vectors being a tick behind server sided)
             // Or mojang had the idle packet... for the 1.7/1.8 clients
             // No idle packet on 1.9+
-            if ((now - player.lastBlockPlaceUseItem < 15 || player.getClientVersion().isOlderThan(ClientVersion.V_1_9)) && hasLook) {
+            // alslaldlsalsala
+            if (hasLook) {
                 player.xRot = yaw;
                 player.yRot = pitch;
             }
