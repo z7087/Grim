@@ -76,7 +76,7 @@ public class RotationPlace extends BlockPlaceCheck {
         double maxEyeHeight = Collections.max(player.getPossibleEyeHeights());
 
         SimpleCollisionBox eyePositions = new SimpleCollisionBox(player.x, player.y + minEyeHeight, player.z, player.x, player.y + maxEyeHeight, player.z);
-        eyePositions.expand(player.getMovementThreshold());
+        box.expand(player.getMovementThreshold());
 
         // If the player is inside a block, then they can ray trace through the block and hit the other side of the block
         if (eyePositions.isIntersected(box)) {
@@ -96,7 +96,7 @@ public class RotationPlace extends BlockPlaceCheck {
 
         for (double d : player.getPossibleEyeHeights()) {
             for (Vector3f lookDir : possibleLookDirs) {
-                // x, y, z are correct for the block placement even after post tick because of code elsewhere
+                // x, y, z are correct for the block placement even after post tick because of code elsewhere...?
                 Vector3d starting = new Vector3d(player.x, player.y + d, player.z);
                 // xRot and yRot are a tick behind
                 Ray trace = new Ray(player, starting.getX(), starting.getY(), starting.getZ(), lookDir.getX(), lookDir.getY());
