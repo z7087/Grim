@@ -18,7 +18,7 @@ public class CrashC extends Check implements PacketCheck {
     public void onPacketReceive(PacketReceiveEvent event) {
         if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
             WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
-            if (flying.hasPositionChanged()) {
+            if (flying.hasPositionChanged() || flying.hasRotationChanged()) {
                 Location pos = flying.getLocation();
                 if (Double.isNaN(pos.getX()) || Double.isNaN(pos.getY()) || Double.isNaN(pos.getZ())
                         || Double.isInfinite(pos.getX()) || Double.isInfinite(pos.getY()) || Double.isInfinite(pos.getZ()) ||
