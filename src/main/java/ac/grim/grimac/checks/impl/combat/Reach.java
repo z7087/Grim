@@ -42,7 +42,8 @@ public class Reach extends Check implements PacketCheck {
     // Only one flag per reach attack, per entity, per tick.
     // We store position because lastX isn't reliable on teleports.
     private final Map<Integer, SimpleCollisionBox> playerAttackQueue = new LinkedHashMap<>();
-    private final Map<Integer, SimpleCollisionBox> playerAttackPostQueue = new LinkedHashMap<>();
+    private final Set<Integer> playerAttackPostQueue = new LinkedHashSet<>();
+    private final Set<Integer> playerAttackShouldIgnoreQueue = new HashSet<>();
     private Vector3d playerLocation = new Vector3d();
     private static final List<EntityType> blacklisted = Arrays.asList(
             EntityTypes.BOAT,
@@ -98,9 +99,10 @@ public class Reach extends Check implements PacketCheck {
             if (player.getClientVersion().isOlderThanOrEquals(ClientVersion.V_1_8)) targetBox.expand(0.1);
 
             // ignore dup entity, seems if a player doesnt send c03 the box doesnt reset?
-            if (playerAttackQueue.get(action.getEntityId()) == null) {
+            if (!playerAttackShouldIgnoreQueue.contains(action.getEntityId())) {
                 playerAttackQueue.put(action.getEntityId(), targetBox); // Queue for next tick for very precise check
-                playerAttackPostQueue.put(action.getEntityId(), targetBox.copy());
+                playerAttackPostQueue.add(action.getEntityId());
+                playerAttackShouldIgnoreQueue.add(action.getEntityId());
                 playerLocation = new Vector3d(player.x, player.y, player.z);
             }
 
@@ -169,17 +171,20 @@ public class Reach extends Check implements PacketCheck {
         }
         playerAttackQueue.clear();
         playerAttackPostQueue.clear();
+        playerAttackShouldIgnoreQueue.clear();
     }
 
     private void tickPost() {
-        for (Map.Entry<Integer, SimpleCollisionBox> attack : playerAttackPostQueue.entrySet()) {
-            PacketEntity reachEntity = player.compensatedEntities.entityMap.get(attack.getKey());
+        for (int attack : playerAttackPostQueue) {
+            PacketEntity reachEntity = player.compensatedEntities.entityMap.get(attack);
 
             if (reachEntity != null) {
-                String result = checkReach(reachEntity, attack.getValue(), true);
+                SimpleCollisionBox targetBox = playerAttackQueue.get(attack);
+                if (targetBox == null) continue;
+                String result = checkReach(reachEntity, targetBox.copy(), true);
                 if (result != null) {
                     flagAndAlert(result);
-                    playerAttackQueue.remove(attack.getKey());
+                    playerAttackQueue.remove(attack);
                 }
             }
         }
