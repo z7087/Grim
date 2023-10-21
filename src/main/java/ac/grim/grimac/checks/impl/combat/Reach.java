@@ -43,7 +43,6 @@ public class Reach extends Check implements PacketCheck {
     // We store position because lastX isn't reliable on teleports.
     private final Map<Integer, SimpleCollisionBox> playerAttackQueue = new LinkedHashMap<>();
     private final Set<Integer> playerAttackPostQueue = new LinkedHashSet<>();
-    private final Set<Integer> playerAttackShouldIgnoreQueue = new HashSet<>();
     private Vector3d playerLocation = new Vector3d();
     private static final List<EntityType> blacklisted = Arrays.asList(
             EntityTypes.BOAT,
@@ -99,14 +98,13 @@ public class Reach extends Check implements PacketCheck {
             if (player.getClientVersion().isOlderThanOrEquals(ClientVersion.V_1_8)) targetBox.expand(0.1);
 
             // ignore dup entity, seems if a player doesnt send c03 the box doesnt reset?
-            if (!playerAttackShouldIgnoreQueue.contains(action.getEntityId())) {
-                playerAttackQueue.put(action.getEntityId(), targetBox); // Queue for next tick for very precise check
+            if (playerAttackQueue.get(action.getEntityId()) == null) {
+                playerAttackQueue.put(action.getEntityId(), targetBox.copy()); // Queue for next tick for very precise check
                 playerAttackPostQueue.add(action.getEntityId());
-                playerAttackShouldIgnoreQueue.add(action.getEntityId());
                 playerLocation = new Vector3d(player.x, player.y, player.z);
             }
 
-            if (shouldModifyPackets() && cancelImpossibleHits && isKnownInvalid(entity, targetBox.copy())) {
+            if (shouldModifyPackets() && cancelImpossibleHits && isKnownInvalid(entity, targetBox)) {
                 event.setCancelled(true);
                 player.onPacketCancel();
             }
@@ -171,7 +169,6 @@ public class Reach extends Check implements PacketCheck {
         }
         playerAttackQueue.clear();
         playerAttackPostQueue.clear();
-        playerAttackShouldIgnoreQueue.clear();
     }
 
     private void tickPost() {
@@ -180,7 +177,7 @@ public class Reach extends Check implements PacketCheck {
 
             if (reachEntity != null) {
                 SimpleCollisionBox targetBox = playerAttackQueue.get(attack);
-                if (targetBox == null) continue;
+                if (targetBox == null) continue; // a?
                 String result = checkReach(reachEntity, targetBox.copy(), true);
                 if (result != null) {
                     flagAndAlert(result);
