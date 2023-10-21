@@ -104,7 +104,7 @@ public class Reach extends Check implements PacketCheck {
                 playerLocation = new Vector3d(player.x, player.y, player.z);
             }
 
-            if (shouldModifyPackets() && cancelImpossibleHits && isKnownInvalid(entity, )) {
+            if (shouldModifyPackets() && cancelImpossibleHits && isKnownInvalid(entity, targetBox.copy())) {
                 event.setCancelled(true);
                 player.onPacketCancel();
             }
