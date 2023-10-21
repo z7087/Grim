@@ -115,8 +115,9 @@ public class Reach extends Check implements PacketCheck {
             if (player.packetStateData.lastPacketWasTeleport || player.packetStateData.lastPacketWasOnePointSeventeenDuplicate)
                 return;
             tickFlying();
-        } else if (event.getPacketType() == PacketType.Play.Client.WINDOW_CONFIRMATION || event.getPacketType() == PacketType.Play.Client.HELD_ITEM_CHANGE) {
-            alert("test");
+        } else if (event.getPacketType() == PacketType.Play.Client.PONG
+                   || event.getPacketType() == PacketType.Play.Client.WINDOW_CONFIRMATION
+                   || event.getPacketType() == PacketType.Play.Client.HELD_ITEM_CHANGE) {
             tickPost();
         }
     }
@@ -176,9 +177,7 @@ public class Reach extends Check implements PacketCheck {
 
             if (reachEntity != null) {
                 String result = checkReach(reachEntity, attack.getValue(), true);
-                alert("test2");
                 if (result != null) {
-                    alert("test3");
                     flagAndAlert(result);
                     playerAttackQueue.remove(attack.getKey());
                 }
