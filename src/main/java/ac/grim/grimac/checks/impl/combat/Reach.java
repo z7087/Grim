@@ -91,21 +91,20 @@ public class Reach extends Check implements PacketCheck {
             if (player.compensatedEntities.getSelf().inVehicle()) return;
             if (entity.riding != null) return;
 
+            SimpleCollisionBox targetBox = entity.getPossibleCollisionBoxes();
+            if (entity.type == EntityTypes.END_CRYSTAL) {
+                targetBox = new SimpleCollisionBox(entity.desyncClientPos.subtract(1, 0, 1), entity.desyncClientPos.add(1, 2, 1));
+            }
+            if (player.getClientVersion().isOlderThanOrEquals(ClientVersion.V_1_8)) targetBox.expand(0.1);
+
             // ignore dup entity, seems if a player doesnt send c03 the box doesnt reset?
             if (playerAttackQueue.get(action.getEntityId()) == null) {
-
-                SimpleCollisionBox targetBox = entity.getPossibleCollisionBoxes();
-                if (entity.type == EntityTypes.END_CRYSTAL) {
-                    targetBox = new SimpleCollisionBox(entity.desyncClientPos.subtract(1, 0, 1), entity.desyncClientPos.add(1, 2, 1));
-                }
-                if (player.getClientVersion().isOlderThanOrEquals(ClientVersion.V_1_8)) targetBox.expand(0.1);
-
                 playerAttackQueue.put(action.getEntityId(), targetBox); // Queue for next tick for very precise check
                 playerAttackPostQueue.put(action.getEntityId(), targetBox.copy());
                 playerLocation = new Vector3d(player.x, player.y, player.z);
             }
 
-            if (shouldModifyPackets() && cancelImpossibleHits && isKnownInvalid(entity, targetBox.copy())) {
+            if (shouldModifyPackets() && cancelImpossibleHits && isKnownInvalid(entity, )) {
                 event.setCancelled(true);
                 player.onPacketCancel();
             }
@@ -134,17 +133,16 @@ public class Reach extends Check implements PacketCheck {
         if ((blacklisted.contains(reachEntity.type) || !reachEntity.isLivingEntity()) && reachEntity.type != EntityTypes.END_CRYSTAL)
             return false; // exempt
 
-        if (!player.packetStateData.didLastMovementIncludePosition || player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_9))
-            targetBox.expand(player.getMovementThreshold());
-
         if (player.gamemode == GameMode.CREATIVE) return false;
         if (player.compensatedEntities.getSelf().inVehicle()) return false;
 
         double lowest = 6;
         // Filter out what we assume to be cheats
         if (cancelBuffer != 0) {
-            return checkReach(reachEntity, playerLocation, true) != null; // If they flagged
+            return checkReach(reachEntity, targetBox, true) != null; // If they flagged
         } else {
+            if (!player.packetStateData.didLastMovementIncludePosition || player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_9))
+                targetBox.expand(player.getMovementThreshold());
             // Don't allow blatant cheats to get first hit
             for (double eyes : player.getPossibleEyeHeights()) {
                 Vector from = new Vector(player.x, player.y + eyes, player.z);
