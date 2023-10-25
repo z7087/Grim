@@ -12,7 +12,7 @@ import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPl
 
 @CheckData(name = "BadPacketsH")
 public class BadPacketsH extends Check implements PacketCheck {
-    private boolean sentAnimation = player.getClientVersion().isNewerThan(ClientVersion.V_1_8);
+    private boolean sentAttack = player.getClientVersion().isOlderThanOrEquals(ClientVersion.V_1_8);
 
     public BadPacketsH(final GrimPlayer player) {
         super(player);
@@ -22,19 +22,19 @@ public class BadPacketsH extends Check implements PacketCheck {
     public void onPacketReceive(PacketReceiveEvent event) {
         PacketType type = event.getPacketType();
         if (type == PacketType.Play.Client.ANIMATION) {
-            sentAnimation = true;
+            sentAttack = false;
         } else if (type == PacketType.Play.Client.INTERACT_ENTITY) {
             WrapperPlayClientInteractEntity packet = new WrapperPlayClientInteractEntity(event);
             if (packet.getAction() == WrapperPlayClientInteractEntity.InteractAction.ATTACK) {
-                if (!sentAnimation && flagAndAlert()) {
+                if (sentAttack && flagAndAlert()) {
                     event.setCancelled(true);
                 }
-                sentAnimation = false;
+                sentAttack = true;
                 return;
             }
         }
 
-        if ((WrapperPlayClientPlayerFlying.isFlying(type)
+        if (WrapperPlayClientPlayerFlying.isFlying(type)
             || type == PacketType.Play.Client.INTERACT_ENTITY
             || type == PacketType.Play.Client.PLAYER_DIGGING
             || type == PacketType.Play.Client.USE_ITEM
@@ -42,9 +42,9 @@ public class BadPacketsH extends Check implements PacketCheck {
             || type == PacketType.Play.Client.PONG
             || type == PacketType.Play.Client.WINDOW_CONFIRMATION) {
 
-            if (!sentAnimation && player.getClientVersion().isNewerThan(ClientVersion.V_1_8)) {
+            if (sentAttack && player.getClientVersion().isNewerThan(ClientVersion.V_1_8)) {
                 flagAndAlert();
-                sentAnimation = true;
+                sentAttack = false;
             }
         }
     }
