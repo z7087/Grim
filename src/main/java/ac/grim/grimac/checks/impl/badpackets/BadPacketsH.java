@@ -6,6 +6,7 @@ import ac.grim.grimac.checks.type.PacketCheck;
 import ac.grim.grimac.player.GrimPlayer;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
@@ -20,7 +21,7 @@ public class BadPacketsH extends Check implements PacketCheck {
 
     @Override
     public void onPacketReceive(PacketReceiveEvent event) {
-        PacketType type = event.getPacketType();
+        PacketTypeCommon type = event.getPacketType();
         if (type == PacketType.Play.Client.ANIMATION) {
             sentAttack = false;
         } else if (type == PacketType.Play.Client.INTERACT_ENTITY) {
