@@ -8,6 +8,7 @@ import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
 
 @CheckData(name = "BadPacketsH")
 public class BadPacketsH extends Check implements PacketCheck {
@@ -19,16 +20,32 @@ public class BadPacketsH extends Check implements PacketCheck {
 
     @Override
     public void onPacketReceive(PacketReceiveEvent event) {
-        if (event.getPacketType() == PacketType.Play.Client.ANIMATION) {
+        PacketType type = event.getPacketType();
+        if (type == PacketType.Play.Client.ANIMATION) {
             sentAnimation = true;
-        } else if (event.getPacketType() == PacketType.Play.Client.INTERACT_ENTITY) {
+        } else if (type == PacketType.Play.Client.INTERACT_ENTITY) {
             WrapperPlayClientInteractEntity packet = new WrapperPlayClientInteractEntity(event);
-            if (packet.getAction() != WrapperPlayClientInteractEntity.InteractAction.ATTACK) return;
-            if (!sentAnimation && flagAndAlert()) {
-                event.setCancelled(true);
+            if (packet.getAction() == WrapperPlayClientInteractEntity.InteractAction.ATTACK) {
+                if (!sentAnimation && flagAndAlert()) {
+                    event.setCancelled(true);
+                }
+                sentAnimation = false;
+                return;
             }
+        }
 
-            sentAnimation = false;
+        if ((WrapperPlayClientPlayerFlying.isFlying(type)
+            || type == PacketType.Play.Client.INTERACT_ENTITY
+            || type == PacketType.Play.Client.PLAYER_DIGGING
+            || type == PacketType.Play.Client.USE_ITEM
+            || type == PacketType.Play.Client.PLAYER_BLOCK_PLACEMENT
+            || type == PacketType.Play.Client.PONG
+            || type == PacketType.Play.Client.WINDOW_CONFIRMATION) {
+
+            if (!sentAnimation && player.getClientVersion().isNewerThan(ClientVersion.V_1_8)) {
+                flagAndAlert();
+                sentAnimation = true;
+            }
         }
     }
 }
