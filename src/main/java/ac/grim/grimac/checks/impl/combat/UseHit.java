@@ -53,7 +53,7 @@ public class UseHit extends Check implements PacketCheck {
             }
         } else if (event.getPacketType() == PacketType.Play.Client.PLAYER_DIGGING) {
             WrapperPlayClientPlayerDigging dig = new WrapperPlayClientPlayerDigging(event);
-            if (dig.getAction() != DiggingAction.START_DIGGING && dig.getAction() != DiggingAction.FINISH_DIGGING)
+            if (dig.getAction() != DiggingAction.START_DIGGING && dig.getAction() != DiggingAction.FINISHED_DIGGING)
                 return;
 
             if (player.packetStateData.slowedByUsingItem) {
