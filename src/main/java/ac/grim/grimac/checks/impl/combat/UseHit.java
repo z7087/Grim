@@ -9,10 +9,12 @@ import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.protocol.player.DiggingAction;
 import com.github.retrooper.packetevents.protocol.player.GameMode;
 import com.github.retrooper.packetevents.protocol.world.BlockFace;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerBlockPlacement;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerDigging;
 
 @CheckData(name = "UseHit")
 public class UseHit extends Check implements PacketCheck {
@@ -49,6 +51,18 @@ public class UseHit extends Check implements PacketCheck {
                     player.onPacketCancel();
                 }
             }
+        } else if (event.getPacketType() == PacketType.Play.Client.PLAYER_DIGGING) {
+            WrapperPlayClientPlayerDigging dig = new WrapperPlayClientPlayerDigging(event);
+            if (dig.getAction() != DiggingAction.START_DIGGING && dig.getAction() != DiggingAction.STOP_DIGGING)
+                return;
+
+            if (player.packetStateData.slowedByUsingItem) {
+                if (flagAndAlert("block break") && shouldModifyPackets()) {
+                    event.setCancelled(true);
+                    player.onPacketCancel();
+                }
+            }
         }
+
     }
 }
