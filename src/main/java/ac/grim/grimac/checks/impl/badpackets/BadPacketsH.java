@@ -45,8 +45,8 @@ public class BadPacketsH extends Check implements PacketCheck {
 
             if (sentAttack && player.getClientVersion().isNewerThan(ClientVersion.V_1_8)) {
                 flagAndAlert();
-                sentAttack = false;
             }
+            sentAttack = player.getClientVersion().isOlderThanOrEquals(ClientVersion.V_1_8);
         }
     }
 }
