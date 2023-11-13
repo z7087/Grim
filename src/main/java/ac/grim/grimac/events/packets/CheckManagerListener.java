@@ -164,7 +164,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
         }
     }
 
-    public static void handleQueuedPlaces(GrimPlayer player, boolean hasLook, float pitch, float yaw, long now) {
+    public static void handleQueuedPlaces(GrimPlayer player, boolean isFlying, boolean hasLook, float pitch, float yaw, long now) {
         // Handle queue'd block places
         BlockPlaceSnapshot snapshot;
         while ((snapshot = player.placeUseItemPackets.poll()) != null) {
@@ -189,13 +189,14 @@ public class CheckManagerListener extends PacketListenerAbstract {
             // Less than 15 milliseconds ago means this is likely (fix all look vectors being a tick behind server sided)
             // Or mojang had the idle packet... for the 1.7/1.8 clients
             // No idle packet on 1.9+
+            // This may false for place check so bypass it
             if ((now - player.lastBlockPlaceUseItem < 15 || player.getClientVersion().isOlderThan(ClientVersion.V_1_9)) && hasLook) {
                 player.xRot = yaw;
                 player.yRot = pitch;
             }
 
             player.compensatedWorld.startPredicting();
-            handleBlockPlaceOrUseItem(snapshot.getWrapper(), player);
+            handleBlockPlaceOrUseItem(snapshot.getWrapper(), player, isFlying, hasLook, yaw, pitch);
             player.compensatedWorld.stopPredicting(snapshot.getWrapper());
 
             player.x = lastX;
@@ -222,7 +223,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
         }
     }
 
-    private static void handleBlockPlaceOrUseItem(PacketWrapper packet, GrimPlayer player) {
+    private static void handleBlockPlaceOrUseItem(PacketWrapper packet, GrimPlayer player, boolean isFlying, boolean hasLook, float yaw, float pitch) {
         // Legacy "use item" packet
         if (packet instanceof WrapperPlayClientPlayerBlockPlacement &&
                 PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_9)) {
@@ -299,7 +300,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 placedWith = player.getInventory().getOffHand();
             }
 
-            BlockPlace blockPlace = new BlockPlace(player, place.getHand(), blockPosition, face, placedWith, getNearestHitResult(player, null, true));
+            PostBlockPlace blockPlace = new PostBlockPlace(player, place.getHand(), blockPosition, face, placedWith, getNearestHitResult(player, null, true));
             // At this point, it is too late to cancel, so we can only flag, and cancel subsequent block places more aggressively
             if (!player.compensatedEntities.getSelf().inVehicle()) {
                 player.checkManager.onPostFlyingBlockPlace(blockPlace);
@@ -636,7 +637,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
             player.lastYRot = player.yRot;
         }
 
-        handleQueuedPlaces(player, hasLook, pitch, yaw, now);
+        handleQueuedPlaces(player, true, hasLook, pitch, yaw, now);
 
         // We can set the new pos after the places
         if (hasPosition) {

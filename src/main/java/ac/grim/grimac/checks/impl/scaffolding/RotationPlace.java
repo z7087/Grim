@@ -4,6 +4,7 @@ import ac.grim.grimac.checks.CheckData;
 import ac.grim.grimac.checks.type.BlockPlaceCheck;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.update.BlockPlace;
+import ac.grim.grimac.utils.anticheat.update.PostBlockPlace;
 import ac.grim.grimac.utils.collisions.datatypes.SimpleCollisionBox;
 import ac.grim.grimac.utils.data.Pair;
 import ac.grim.grimac.utils.nmsutil.Ray;
@@ -43,7 +44,7 @@ public class RotationPlace extends BlockPlaceCheck {
 
     // Use post flying because it has the correct rotation, and can't false easily.
     @Override
-    public void onPostFlyingBlockPlace(BlockPlace place) {
+    public void onPostFlyingBlockPlace(PostBlockPlace place) {
         if (place.getMaterial() == StateTypes.SCAFFOLDING) return;
 
         // Don't flag twice
