@@ -13,7 +13,6 @@ public class PostBlockPlace extends BlockPlace {
     // or it is post
     @Getter
     boolean isFlying;
-    @Getter
     boolean hasLook;
     @Getter
     float yaw;
@@ -31,5 +30,9 @@ public class PostBlockPlace extends BlockPlace {
         this.hasLook = hasLook;
         this.yaw = yaw;
         this.pitch = pitch;
+    }
+
+    public boolean hasLook() {
+        return this.hasLook;
     }
 }
