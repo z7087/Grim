@@ -24,7 +24,7 @@ import java.util.List;
 
 @CheckData(name = "RotationPlace")
 public class RotationPlace extends BlockPlaceCheck {
-    double threshold = 0.0001;
+    double threshold = 0.001;
 
     public RotationPlace(GrimPlayer player) {
         super(player);
