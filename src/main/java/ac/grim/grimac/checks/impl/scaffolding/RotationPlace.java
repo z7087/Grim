@@ -62,8 +62,8 @@ public class RotationPlace extends BlockPlaceCheck {
         // End checking if the player is in the block
 
 
-        float yaw = place.getHasRotation() ? place.getYaw() : player.xRot;
-        float pitch = place.getHasRotation() ? place.getPitch() : player.yRot;
+        float yaw = place.getHasLook() ? place.getYaw() : player.xRot;
+        float pitch = place.getHasLook() ? place.getPitch() : player.yRot;
 
         List<Vector3f> possibleLookDirs = new ArrayList<>(Arrays.asList(
                 new Vector3f(player.lastXRot, pitch, 0),
