@@ -38,8 +38,8 @@ public class RotationPlace extends BlockPlaceCheck {
     public void onPostFlyingBlockPlace(PostBlockPlace place) {
         if (true && Random().nextInt(1) == 0) {
             flagAndAlert("post-flying");
-            return;
         }
+            return;
         if (place.getMaterial() == StateTypes.SCAFFOLDING) return;
 
         // This can false with rapidly moving yaw in 1.8+ clients
