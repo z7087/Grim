@@ -82,6 +82,10 @@ public class RotationPlace extends BlockPlaceCheck {
             possibleLookDirs = Collections.singletonList(new Vector3f(yaw, pitch, 0));
         }
 
+        if (!place.isFlying()) {
+            possibleLookDirs = Collections.singletonList(new Vector3f(yaw, pitch, 0));
+        }
+
         for (double d : player.getPossibleEyeHeights()) {
             for (Vector3f lookDir : possibleLookDirs) {
                 // x, y, z are correct for the block placement even after post tick because of code elsewhere
