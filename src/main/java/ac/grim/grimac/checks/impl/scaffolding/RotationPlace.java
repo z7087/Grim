@@ -61,7 +61,7 @@ public class RotationPlace extends BlockPlaceCheck {
         SimpleCollisionBox cursorBox = new SimpleCollisionBox(clickLocation, clickLocation).expand(threshold);
         cursorBox.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
 
-        boolean needCheckCursor = isEyeInBox(cursorBox) || (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11));
+        boolean skipCheckCursor = isEyeInBox(cursorBox) || (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11));
 
 
         float yaw = place.hasLook() ? place.getYaw() : player.xRot;
@@ -92,7 +92,7 @@ public class RotationPlace extends BlockPlaceCheck {
 
                 if (blockIntercept.getFirst() != null) {
                     // use the cursor recheck
-                    if (!needCheckCursor)
+                    if (skipCheckCursor)
                         return true;
                     Pair<Vector, BlockFace> cursorIntercept = ReachUtils.calculateIntercept(cursorBox, trace.getOrigin(), trace.getPointAtDistance(6));
                     if (cursorIntercept.getFirst() != null)
