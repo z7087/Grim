@@ -301,6 +301,17 @@ public class CheckManagerListener extends PacketListenerAbstract {
             }
 
             PostBlockPlace blockPlace = new PostBlockPlace(player, place.getHand(), blockPosition, face, placedWith, getNearestHitResult(player, null, true));
+            blockPlace.setCursor(place.getCursorPosition());
+
+            if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11)) {
+                if (place.getCursorPosition().getX() * 15 % 1 == 0 && place.getCursorPosition().getY() * 15 % 1 == 0 && place.getCursorPosition().getZ() * 15 % 1 == 0) {
+                    int trueByteX = (int) (place.getCursorPosition().getX() * 15);
+                    int trueByteY = (int) (place.getCursorPosition().getY() * 15);
+                    int trueByteZ = (int) (place.getCursorPosition().getZ() * 15);
+
+                    blockPlace.setCursor(new Vector3f(trueByteX / 16f, trueByteY / 16f, trueByteZ / 16f));
+                }
+            }
             // At this point, it is too late to cancel, so we can only flag, and cancel subsequent block places more aggressively
             if (!player.compensatedEntities.getSelf().inVehicle()) {
                 player.checkManager.onPostFlyingBlockPlace(blockPlace);
