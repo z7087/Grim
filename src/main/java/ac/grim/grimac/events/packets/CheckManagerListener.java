@@ -164,7 +164,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
         }
     }
 
-    public static void handleQueuedPlaces(GrimPlayer player, boolean isFlying, boolean hasLook, float yaw, float pitch, long now) {
+    public static void handleQueuedPlaces(GrimPlayer player, boolean isFlying, boolean hasLook, float pitch, float yaw, long now) {
         // Handle queue'd block places
         BlockPlaceSnapshot snapshot;
         while ((snapshot = player.placeUseItemPackets.poll()) != null) {
@@ -648,7 +648,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
             player.lastYRot = player.yRot;
         }
 
-        handleQueuedPlaces(player, true, hasLook, yaw, pitch, now);
+        handleQueuedPlaces(player, true, hasLook, pitch, yaw, now);
 
         // We can set the new pos after the places
         if (hasPosition) {
