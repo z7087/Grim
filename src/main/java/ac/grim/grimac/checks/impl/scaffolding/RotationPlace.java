@@ -44,6 +44,7 @@ public class RotationPlace extends BlockPlaceCheck {
             flagAndAlert("post-block");
         } else if (!didRayTraceHitCursor(place)) {
             flagAndAlert("post-cursor");
+            alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
         }
     }
 
