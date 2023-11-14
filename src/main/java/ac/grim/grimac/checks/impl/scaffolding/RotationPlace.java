@@ -9,6 +9,8 @@ import ac.grim.grimac.utils.collisions.datatypes.SimpleCollisionBox;
 import ac.grim.grimac.utils.data.Pair;
 import ac.grim.grimac.utils.nmsutil.Ray;
 import ac.grim.grimac.utils.nmsutil.ReachUtils;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.protocol.world.BlockFace;
 import com.github.retrooper.packetevents.protocol.world.states.type.StateTypes;
@@ -36,12 +38,28 @@ public class RotationPlace extends BlockPlaceCheck {
         if (place.getMaterial() == StateTypes.SCAFFOLDING) return;
 
         // This can false with rapidly moving yaw in 1.8+ clients
-        if (!didRayTraceHit(place)) {
-            flagAndAlert("post-flying");
+        // idk where
+        if (!didRayTraceHitBlock(place)) {
+            flagAndAlert("post-block");
+        } else if (!didRayTraceHitCursor(place)) {
+            flagAndAlert("post-cursor");
         }
     }
 
-    private boolean didRayTraceHit(PostBlockPlace place) {
+    private boolean didRayTraceHitBlock(PostBlockPlace place) {
+
+        SimpleCollisionBox box = new SimpleCollisionBox(place.getPlacedAgainstBlockLocation());
+        box.expand(player.getMovementThreshold());
+
+        return isEyeInBox(box) || postCheck(place, box);
+    }
+
+    private boolean didRayTraceHitCursor(PostBlockPlace place) {
+        // cursor from viarewind may false
+        if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11)) {
+            return true;
+        }
+
         Vector3i placeLocation = place.getPlacedAgainstBlockLocation();
         Vector3f cursor = place.getCursor();
         Vector3d clickLocation = new Vector3d(placeLocation.getX() + cursor.getX(), placeLocation.getY() + cursor.getY(), placeLocation.getZ() + cursor.getZ());
@@ -49,19 +67,19 @@ public class RotationPlace extends BlockPlaceCheck {
         SimpleCollisionBox box = new SimpleCollisionBox(clickLocation, clickLocation).expand(threshold);
         box.expand(player.getMovementThreshold());
 
-        // Start checking if player is in the block
+        return isEyeInBox(box) || postCheck(place, box);
+    }
+
+    private boolean isEyeInBox(SimpleCollisionBox box) {
         double minEyeHeight = Collections.min(player.getPossibleEyeHeights());
         double maxEyeHeight = Collections.max(player.getPossibleEyeHeights());
 
         SimpleCollisionBox eyePositions = new SimpleCollisionBox(player.x, player.y + minEyeHeight, player.z, player.x, player.y + maxEyeHeight, player.z);
 
-        // If the player is inside a block, then they can ray trace through the block and hit the other side of the block
-        if (eyePositions.isIntersected(box)) {
-            return true;
-        }
-        // End checking if the player is in the block
+        return eyePositions.isIntersected(box);
+    }
 
-
+    private boolean postCheck(PostBlockPlace place, SimpleCollisionBox box) {
         float yaw = place.hasLook() ? place.getYaw() : player.xRot;
         float pitch = place.hasLook() ? place.getPitch() : player.yRot;
 
