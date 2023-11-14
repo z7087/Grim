@@ -39,49 +39,31 @@ public class RotationPlace extends BlockPlaceCheck {
 
         // This can false with rapidly moving yaw in 1.8+ clients
         // idk where
-        // why why why false
-        if (!didRayTraceHitBlock(place)) {
-            flagAndAlert("post-block");
-        } else if (!didRayTraceHitCursor(place)) {
-            flagAndAlert("post-cursor");
-            alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
+        if (!didRayTraceHit(place)) {
+            flagAndAlert("post-flying");
         }
     }
 
-    private boolean didRayTraceHitBlock(PostBlockPlace place) {
+    private boolean didRayTraceHit(PostBlockPlace place) {
+        Vector3i placeLocation = place.getPlacedAgainstBlockLocation();
 
-        SimpleCollisionBox box = new SimpleCollisionBox(place.getPlacedAgainstBlockLocation());
-        box.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
+        SimpleCollisionBox blockBox = new SimpleCollisionBox(placeLocation);
+        blockBox.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
 
-        return isEyeInBox(box) || postCheck(place, box);
-    }
-
-    private boolean didRayTraceHitCursor(PostBlockPlace place) {
-        // cursor from viarewind may false
-        if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11)) {
+        if (isEyeInBox(blockBox)) {
             return true;
         }
 
-        Vector3i placeLocation = place.getPlacedAgainstBlockLocation();
+
         Vector3f cursor = place.getCursor();
         Vector3d clickLocation = new Vector3d(placeLocation.getX() + cursor.getX(), placeLocation.getY() + cursor.getY(), placeLocation.getZ() + cursor.getZ());
 
-        SimpleCollisionBox box = new SimpleCollisionBox(clickLocation, clickLocation).expand(threshold);
-        box.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
+        SimpleCollisionBox cursorBox = new SimpleCollisionBox(clickLocation, clickLocation).expand(threshold);
+        cursorBox.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
 
-        return isEyeInBox(box) || postCheck(place, box);
-    }
+        boolean needCheckCursor = isEyeInBox(cursorBox) || (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11));
 
-    private boolean isEyeInBox(SimpleCollisionBox box) {
-        double minEyeHeight = Collections.min(player.getPossibleEyeHeights());
-        double maxEyeHeight = Collections.max(player.getPossibleEyeHeights());
 
-        SimpleCollisionBox eyePositions = new SimpleCollisionBox(player.x, player.y + minEyeHeight, player.z, player.x, player.y + maxEyeHeight, player.z);
-
-        return eyePositions.isIntersected(box);
-    }
-
-    private boolean postCheck(PostBlockPlace place, SimpleCollisionBox box) {
         float yaw = place.hasLook() ? place.getYaw() : player.xRot;
         float pitch = place.hasLook() ? place.getPitch() : player.yRot;
 
@@ -106,12 +88,28 @@ public class RotationPlace extends BlockPlaceCheck {
                 Vector3d starting = new Vector3d(player.x, player.y + d, player.z);
                 // xRot and yRot are a tick behind
                 Ray trace = new Ray(player, starting.getX(), starting.getY(), starting.getZ(), lookDir.getX(), lookDir.getY());
-                Pair<Vector, BlockFace> intercept = ReachUtils.calculateIntercept(box, trace.getOrigin(), trace.getPointAtDistance(6));
+                Pair<Vector, BlockFace> blockIntercept = ReachUtils.calculateIntercept(blockBox, trace.getOrigin(), trace.getPointAtDistance(6));
 
-                if (intercept.getFirst() != null) return true;
+                if (blockIntercept.getFirst() != null) {
+                    // use the cursor recheck
+                    if (!needCheckCursor)
+                        return true;
+                    Pair<Vector, BlockFace> cursorIntercept = ReachUtils.calculateIntercept(cursorBox, trace.getOrigin(), trace.getPointAtDistance(6));
+                    if (cursorIntercept.getFirst() != null)
+                        return true;
+                }
             }
         }
 
         return false;
+    }
+
+    private boolean isEyeInBox(SimpleCollisionBox box) {
+        double minEyeHeight = Collections.min(player.getPossibleEyeHeights());
+        double maxEyeHeight = Collections.max(player.getPossibleEyeHeights());
+
+        SimpleCollisionBox eyePositions = new SimpleCollisionBox(player.x, player.y + minEyeHeight, player.z, player.x, player.y + maxEyeHeight, player.z);
+
+        return eyePositions.isIntersected(box);
     }
 }
