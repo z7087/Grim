@@ -26,7 +26,7 @@ import java.util.List;
 
 @CheckData(name = "RotationPlace")
 public class RotationPlace extends BlockPlaceCheck {
-    double threshold = 0.001;
+    double threshold = 0.0001;
 
     public RotationPlace(GrimPlayer player) {
         super(player);
@@ -39,6 +39,7 @@ public class RotationPlace extends BlockPlaceCheck {
 
         // This can false with rapidly moving yaw in 1.8+ clients
         // idk where
+        // why why why false
         if (!didRayTraceHitBlock(place)) {
             flagAndAlert("post-block");
         } else if (!didRayTraceHitCursor(place)) {
