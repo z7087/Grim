@@ -26,7 +26,7 @@ import java.util.List;
 
 @CheckData(name = "RotationPlace")
 public class RotationPlace extends BlockPlaceCheck {
-    double threshold = 0.0001;
+    double threshold = 0.001;
 
     public RotationPlace(GrimPlayer player) {
         super(player);
@@ -49,7 +49,7 @@ public class RotationPlace extends BlockPlaceCheck {
     private boolean didRayTraceHitBlock(PostBlockPlace place) {
 
         SimpleCollisionBox box = new SimpleCollisionBox(place.getPlacedAgainstBlockLocation());
-        box.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
+        //box.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
 
         return isEyeInBox(box) || postCheck(place, box);
     }
@@ -65,7 +65,7 @@ public class RotationPlace extends BlockPlaceCheck {
         Vector3d clickLocation = new Vector3d(placeLocation.getX() + cursor.getX(), placeLocation.getY() + cursor.getY(), placeLocation.getZ() + cursor.getZ());
 
         SimpleCollisionBox box = new SimpleCollisionBox(clickLocation, clickLocation).expand(threshold);
-        box.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
+        //box.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
 
         return isEyeInBox(box) || postCheck(place, box);
     }
