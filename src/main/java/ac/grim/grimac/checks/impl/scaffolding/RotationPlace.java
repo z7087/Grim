@@ -58,7 +58,7 @@ public class RotationPlace extends BlockPlaceCheck {
         cursorBox.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
 
         // cursor check may false behind viarewind, exempt
-        boolean skipCheckCursor = PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11);
+        boolean skipCheckCursor = (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11)) || PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_11);
 
 
         // xRot and yRot may false because of code elsewhere
