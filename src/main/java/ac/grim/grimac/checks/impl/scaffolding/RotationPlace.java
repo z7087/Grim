@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 @CheckData(name = "RotationPlace")
 public class RotationPlace extends BlockPlaceCheck {
@@ -36,14 +35,11 @@ public class RotationPlace extends BlockPlaceCheck {
     // Use post flying because it has the correct rotation, and can't false easily.
     @Override
     public void onPostFlyingBlockPlace(PostBlockPlace place) {
-        if (true && Random().nextInt(1) == 0) {
-            flagAndAlert("post-flying");
-        }
-            return;
         if (place.getMaterial() == StateTypes.SCAFFOLDING) return;
 
         // This can false with rapidly moving yaw in 1.8+ clients
         // idk where
+        alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
         if (!didRayTraceHit(place)) {
             flagAndAlert("post-flying");
         }
