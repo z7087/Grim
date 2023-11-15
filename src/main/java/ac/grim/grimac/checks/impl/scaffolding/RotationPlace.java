@@ -42,6 +42,7 @@ public class RotationPlace extends BlockPlaceCheck {
         if (place.getMaterial() == StateTypes.SCAFFOLDING) return;
 
         PostBlockPlace postPlace = new PostBlockPlace(player, place);
+        postPlace.setCursor(place.getCursor());
 
         // don't check cursor even player flagged
         if (flagBuffer > 0 && !didRayTraceHit(postPlace, true)) {
