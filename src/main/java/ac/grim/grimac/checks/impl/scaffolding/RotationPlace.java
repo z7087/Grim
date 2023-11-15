@@ -38,7 +38,6 @@ public class RotationPlace extends BlockPlaceCheck {
         if (place.getMaterial() == StateTypes.SCAFFOLDING) return;
 
         // This can false with rapidly moving yaw in 1.8+ clients
-        // idk where
         //alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
         if (!didRayTraceHit(place)) {
             flagAndAlert("post-flying");
@@ -51,20 +50,17 @@ public class RotationPlace extends BlockPlaceCheck {
         SimpleCollisionBox blockBox = new SimpleCollisionBox(placeLocation);
         blockBox.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
 
-        if (isEyeInBox(blockBox)) {
-            return true;
-        }
-
-
         Vector3f cursor = place.getCursor();
         Vector3d clickLocation = new Vector3d(placeLocation.getX() + cursor.getX(), placeLocation.getY() + cursor.getY(), placeLocation.getZ() + cursor.getZ());
 
         SimpleCollisionBox cursorBox = new SimpleCollisionBox(clickLocation, clickLocation).expand(threshold);
         cursorBox.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
 
-        boolean skipCheckCursor = isEyeInBox(cursorBox) || (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11));
+        // cursor check may false behind viarewind, exempt
+        boolean skipCheckCursor = PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11);
 
 
+        // xRot and yRot may false because of code elsewhere
         float yaw = place.hasLook() ? place.getYaw() : player.xRot;
         float pitch = place.hasLook() ? place.getPitch() : player.yRot;
 
@@ -83,12 +79,24 @@ public class RotationPlace extends BlockPlaceCheck {
             possibleLookDirs = Collections.singletonList(new Vector3f(yaw, pitch, 0));
         }
 
+        // player's rotation didn't change, don't use lastRot
         if (!place.isFlying()) {
             possibleLookDirs = Collections.singletonList(new Vector3f(yaw, pitch, 0));
         }
 
         for (double d : player.getPossibleEyeHeights()) {
             for (Vector3f lookDir : possibleLookDirs) {
+                if (isEyeInBox(blockBox, d)) {
+                    // use the cursor recheck
+                    if (skipCheckCursor || isEyeInBox(cursorBox, d))
+                        return true;
+                    Pair<Vector, BlockFace> cursorIntercept = ReachUtils.calculateIntercept(cursorBox, trace.getOrigin(), trace.getPointAtDistance(6));
+                    if (cursorIntercept.getFirst() != null)
+                        return true;
+                    // end blockBox check
+                    continue;
+                }
+
                 // x, y, z are correct for the block placement even after post tick because of code elsewhere
                 Vector3d starting = new Vector3d(player.x, player.y + d, player.z);
                 // xRot and yRot are a tick behind
@@ -97,7 +105,7 @@ public class RotationPlace extends BlockPlaceCheck {
 
                 if (blockIntercept.getFirst() != null) {
                     // use the cursor recheck
-                    if (skipCheckCursor)
+                    if (skipCheckCursor || isEyeInBox(cursorBox, d))
                         return true;
                     Pair<Vector, BlockFace> cursorIntercept = ReachUtils.calculateIntercept(cursorBox, trace.getOrigin(), trace.getPointAtDistance(6));
                     if (cursorIntercept.getFirst() != null)
@@ -109,11 +117,8 @@ public class RotationPlace extends BlockPlaceCheck {
         return false;
     }
 
-    private boolean isEyeInBox(SimpleCollisionBox box) {
-        double minEyeHeight = Collections.min(player.getPossibleEyeHeights());
-        double maxEyeHeight = Collections.max(player.getPossibleEyeHeights());
-
-        SimpleCollisionBox eyePositions = new SimpleCollisionBox(player.x, player.y + minEyeHeight, player.z, player.x, player.y + maxEyeHeight, player.z);
+    private boolean isEyeInBox(SimpleCollisionBox box, double eyeHeight) {
+        SimpleCollisionBox eyePositions = new SimpleCollisionBox(player.x, player.y + eyeHeight, player.z, player.x, player.y + eyeHeight, player.z);
 
         return eyePositions.isIntersected(box);
     }
