@@ -164,7 +164,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
         }
     }
 
-    public static void handleQueuedPlaces(GrimPlayer player, boolean isFlying, boolean hasLook, float pitch, float yaw, long now) {
+    public static void handleQueuedPlaces(GrimPlayer player, boolean isFlying, boolean hasLook, float yaw, float pitch, long now) {
         // Handle queue'd block places
         BlockPlaceSnapshot snapshot;
         while ((snapshot = player.placeUseItemPackets.poll()) != null) {
@@ -300,7 +300,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 placedWith = player.getInventory().getOffHand();
             }
 
-            PostBlockPlace blockPlace = new PostBlockPlace(player, place.getHand(), blockPosition, face, placedWith, getNearestHitResult(player, null, true));
+            PostBlockPlace blockPlace = new PostBlockPlace(player, place.getHand(), blockPosition, face, placedWith, getNearestHitResult(player, null, true), isFlying, hasLook, yaw, pitch);
             blockPlace.setCursor(place.getCursorPosition());
 
             if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11)) {
@@ -648,7 +648,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
             player.lastYRot = player.yRot;
         }
 
-        handleQueuedPlaces(player, true, hasLook, pitch, yaw, now);
+        handleQueuedPlaces(player, true, hasLook, yaw, pitch, now);
 
         // We can set the new pos after the places
         if (hasPosition) {

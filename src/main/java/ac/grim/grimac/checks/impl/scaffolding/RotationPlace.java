@@ -39,7 +39,7 @@ public class RotationPlace extends BlockPlaceCheck {
 
         // This can false with rapidly moving yaw in 1.8+ clients
         // idk where
-        alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
+        //alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
         if (!didRayTraceHit(place)) {
             flagAndAlert("post-flying");
         }
