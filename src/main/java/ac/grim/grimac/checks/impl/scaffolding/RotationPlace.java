@@ -26,10 +26,34 @@ import java.util.List;
 
 @CheckData(name = "RotationPlace")
 public class RotationPlace extends BlockPlaceCheck {
+    double flagBuffer = 0; // If the player flags once, force them to play legit, or we will cancel the tick before.
+    boolean ignorePost = false;
+
+    // idk how much 1.11- server threshold safe
     double threshold = PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_11) ? 0.1 : 0.0001;
+    boolean shouldSkipCheckCursor = PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11);
 
     public RotationPlace(GrimPlayer player) {
         super(player);
+    }
+
+    @Override
+    public void onBlockPlace(final BlockPlace place) {
+        if (place.getMaterial() == StateTypes.SCAFFOLDING) return;
+
+        PostBlockPlace postPlace = new PostBlockPlace(player, place);
+
+        // don't check cursor even player flagged
+        if (flagBuffer > 0 && !didRayTraceHit(postPlace, true)) {
+            // If the player hit and has flagged this check recently
+            if (flagAndAlert("pre-flying")) {
+                if (shouldModifyPackets() && shouldCancel()) {
+                    place.resync();  // Deny the block placement.
+                }
+            } else {
+                ignorePost = true;
+            }
+        }
     }
 
     // Use post flying because it has the correct rotation, and can't false easily.
@@ -37,15 +61,26 @@ public class RotationPlace extends BlockPlaceCheck {
     public void onPostFlyingBlockPlace(PostBlockPlace place) {
         if (place.getMaterial() == StateTypes.SCAFFOLDING) return;
 
+        // Don't flag twice
+        if (ignorePost) {
+            ignorePost = false;
+            return;
+        }
+
         // This can false with rapidly moving yaw in 1.8+ clients
         //alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
-        if (!didRayTraceHit(place)) {
+
+        // cursor check may false behind via, exempt
+        if (!didRayTraceHit(place, shouldSkipCheckCursor)) {
+            flagBuffer = 1;
             flagAndAlert("post-flying");
+        } else {
+            flagBuffer = Math.max(0, flagBuffer - 0.1);
         }
     }
 
     // player must rayTrace the block and the cursor
-    private boolean didRayTraceHit(PostBlockPlace place) {
+    private boolean didRayTraceHit(PostBlockPlace place, boolean skipCheckCursor) {
         Vector3i placeLocation = place.getPlacedAgainstBlockLocation();
 
         SimpleCollisionBox blockBox = new SimpleCollisionBox(placeLocation);
