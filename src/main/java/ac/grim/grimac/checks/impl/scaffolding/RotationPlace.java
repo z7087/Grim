@@ -30,7 +30,7 @@ public class RotationPlace extends BlockPlaceCheck {
     boolean ignorePost = false;
 
     // idk how much 1.11- server threshold safe
-    double threshold = PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_11) ? 0.1 : 0.0001;
+    double cursorThreshold = PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_11) ? 0.1 : 0.0001;
     boolean shouldSkipCheckCursor = PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11);
 
     public RotationPlace(GrimPlayer player) {
@@ -89,11 +89,8 @@ public class RotationPlace extends BlockPlaceCheck {
         Vector3f cursor = place.getCursor();
         Vector3d clickLocation = new Vector3d(placeLocation.getX() + cursor.getX(), placeLocation.getY() + cursor.getY(), placeLocation.getZ() + cursor.getZ());
 
-        SimpleCollisionBox cursorBox = new SimpleCollisionBox(clickLocation, clickLocation).expand(threshold);
+        SimpleCollisionBox cursorBox = new SimpleCollisionBox(clickLocation, clickLocation).expand(cursorThreshold);
         cursorBox.expand(player.getClientVersion().isOlderThan(ClientVersion.V_1_9) ? 0.05 : player.getMovementThreshold());
-
-        // cursor check may false behind via, exempt
-        boolean skipCheckCursor = PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11);
 
 
         // xRot and yRot may false because of code elsewhere
