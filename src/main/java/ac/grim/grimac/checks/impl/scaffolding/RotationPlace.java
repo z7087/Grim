@@ -44,6 +44,7 @@ public class RotationPlace extends BlockPlaceCheck {
         }
     }
 
+    // player must rayTrace the block and the cursor
     private boolean didRayTraceHit(PostBlockPlace place) {
         Vector3i placeLocation = place.getPlacedAgainstBlockLocation();
 
@@ -86,6 +87,11 @@ public class RotationPlace extends BlockPlaceCheck {
 
         for (double d : player.getPossibleEyeHeights()) {
             for (Vector3f lookDir : possibleLookDirs) {
+                // x, y, z are correct for the block placement even after post tick because of code elsewhere
+                Vector3d starting = new Vector3d(player.x, player.y + d, player.z);
+                // xRot and yRot are a tick behind
+                Ray trace = new Ray(player, starting.getX(), starting.getY(), starting.getZ(), lookDir.getX(), lookDir.getY());
+
                 if (isEyeInBox(blockBox, d)) {
                     // use the cursor recheck
                     if (skipCheckCursor || isEyeInBox(cursorBox, d))
@@ -97,10 +103,6 @@ public class RotationPlace extends BlockPlaceCheck {
                     continue;
                 }
 
-                // x, y, z are correct for the block placement even after post tick because of code elsewhere
-                Vector3d starting = new Vector3d(player.x, player.y + d, player.z);
-                // xRot and yRot are a tick behind
-                Ray trace = new Ray(player, starting.getX(), starting.getY(), starting.getZ(), lookDir.getX(), lookDir.getY());
                 Pair<Vector, BlockFace> blockIntercept = ReachUtils.calculateIntercept(blockBox, trace.getOrigin(), trace.getPointAtDistance(6));
 
                 if (blockIntercept.getFirst() != null) {
