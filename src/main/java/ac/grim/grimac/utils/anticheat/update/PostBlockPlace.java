@@ -33,7 +33,11 @@ public class PostBlockPlace extends BlockPlace {
     }
 
     public PostBlockPlace(GrimPlayer player, BlockPlace place) {
-        this(player, place.getHand(), place.getPlacedAgainstBlockLocation(), place.getDirection(), place.getItemStack(), place.getHitData());
+        this(player, place, false, false, 0f, 0f);
+    }
+
+    public PostBlockPlace(GrimPlayer player, BlockPlace place, boolean isFlying, boolean hasLook, float yaw, float pitch) {
+        this(player, place.getHand(), place.getPlacedAgainstBlockLocation(), place.getDirection(), place.getItemStack(), place.getHitData(), isFlying, hasLook, yaw, pitch);
     }
 
 
