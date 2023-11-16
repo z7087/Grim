@@ -50,9 +50,9 @@ public class RotationPlace extends BlockPlaceCheck {
             if (flagAndAlert("pre-flying")) {
                 if (shouldModifyPackets() && shouldCancel()) {
                     place.resync();  // Deny the block placement.
+                } else {
+                    ignorePost = true;
                 }
-            } else {
-                ignorePost = true;
             }
         }
     }
