@@ -7,6 +7,7 @@ import ac.grim.grimac.utils.anticheat.update.BlockPlace;
 import ac.grim.grimac.utils.anticheat.update.PostBlockPlace;
 import ac.grim.grimac.utils.collisions.datatypes.SimpleCollisionBox;
 import ac.grim.grimac.utils.data.Pair;
+import ac.grim.grimac.utils.nmsutil.Materials;
 import ac.grim.grimac.utils.nmsutil.Ray;
 import ac.grim.grimac.utils.nmsutil.ReachUtils;
 import com.github.retrooper.packetevents.PacketEvents;
@@ -71,8 +72,12 @@ public class RotationPlace extends BlockPlaceCheck {
         // This can false with rapidly moving yaw in 1.8+ clients
         //alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
 
-        // cursor check may false behind via, exempt
-        if (!didRayTraceHit(place, shouldSkipCheckCursor)) {
+
+
+        if (!isCursorValid(place.getCursor(), Materials.isShapeExceedsCube(place.getPlacedAgainstMaterial()) || place.getPlacedAgainstMaterial() == StateTypes.LECTERN ? 1.5 : 1)) {
+            flagBuffer = 1;
+            flagAndAlert("invalid-cursor");
+        } else if (!didRayTraceHit(place, shouldSkipCheckCursor)) { // cursor check may false behind via, exempt
             flagBuffer = 1;
             flagAndAlert("post-flying");
         } else {
@@ -156,5 +161,16 @@ public class RotationPlace extends BlockPlaceCheck {
         SimpleCollisionBox eyePositions = new SimpleCollisionBox(player.x, player.y + eyeHeight, player.z, player.x, player.y + eyeHeight, player.z);
 
         return eyePositions.isIntersected(box);
+    }
+
+
+    private boolean isCursorValid(Vector3f cursor, double allowed) {
+        if (Float.isFinite(cursor.getX()) && Float.isFinite(cursor.getY()) && Float.isFinite(cursor.getZ()) {
+            double minAllowed = 1 - allowed;
+            if (cursor.getX() < minAllowed || cursor.getY() < minAllowed || cursor.getZ() < minAllowed || cursor.getX() > allowed || cursor.getY() > allowed || cursor.getZ() > allowed) {
+                return true;
+            }
+        }
+        return false;
     }
 }
