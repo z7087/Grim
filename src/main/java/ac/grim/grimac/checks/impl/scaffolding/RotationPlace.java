@@ -165,11 +165,12 @@ public class RotationPlace extends BlockPlaceCheck {
 
 
     private boolean isCursorValid(Vector3f cursor, double allowed) {
-        if (Float.isFinite(cursor.getX()) && Float.isFinite(cursor.getY()) && Float.isFinite(cursor.getZ()) {
+        if (Float.isFinite(cursor.getX()) && Float.isFinite(cursor.getY()) && Float.isFinite(cursor.getZ())) {
             double minAllowed = 1 - allowed;
             if (cursor.getX() < minAllowed || cursor.getY() < minAllowed || cursor.getZ() < minAllowed || cursor.getX() > allowed || cursor.getY() > allowed || cursor.getZ() > allowed) {
-                return true;
+                return false;
             }
+            return true;
         }
         return false;
     }
