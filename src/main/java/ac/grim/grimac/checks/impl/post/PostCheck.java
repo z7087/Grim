@@ -114,6 +114,7 @@ public class PostCheck extends Check implements PacketCheck, PostPredictionCheck
             }
             return true;
         }
+        return false;
     }
 
 }
