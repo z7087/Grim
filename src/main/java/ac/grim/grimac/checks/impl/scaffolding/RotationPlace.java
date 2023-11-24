@@ -70,11 +70,11 @@ public class RotationPlace extends BlockPlaceCheck {
         }
 
         // This can false with rapidly moving yaw in 1.8+ clients
-        alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
-        alert("cursor: "+place.getCursor().getX()+" "+place.getCursor().getY()+" "+place.getCursor().getZ());
+        //alert("isFlying: "+place.isFlying()+" hasLook: "+place.hasLook()+" yaw: "+place.getYaw()+" pitch: "+place.getPitch());
+        //alert("cursor: "+place.getCursor().getX()+" "+place.getCursor().getY()+" "+place.getCursor().getZ());
 
 
-
+        // wait didn't FabricatedPlace check work?
         if (!isCursorValid(place.getCursor(), Materials.isShapeExceedsCube(place.getPlacedAgainstMaterial()) || place.getPlacedAgainstMaterial() == StateTypes.LECTERN ? 1.5 : 1)) {
             flagBuffer = 1;
             flagAndAlert("invalid-cursor");
