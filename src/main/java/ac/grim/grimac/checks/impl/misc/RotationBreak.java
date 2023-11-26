@@ -47,9 +47,9 @@ public class RotationBreak extends Check implements PacketCheck {
         if (event.getPacketType() == PacketType.Play.Client.PLAYER_DIGGING) {
             WrapperPlayClientPlayerDigging dig = new WrapperPlayClientPlayerDigging(event);
             if (dig.getAction() == DiggingAction.START_DIGGING || dig.getAction() == DiggingAction.FINISHED_DIGGING) {
-                // new tick, check last digging
-                if (targetBlock != null && needPostCheck) {
-                    if (!didRayTraceHit(targetBlock)) {
+                // new mouseover means new tick, check last digging
+                if (targetBlock != null && !dig.getBlockPosition().equals(targetBlock)) {
+                    if (needPostCheck && !didRayTraceHit(targetBlock)) {
                         flagAndAlert("quick break");
                     }
                     targetBlock = null;
