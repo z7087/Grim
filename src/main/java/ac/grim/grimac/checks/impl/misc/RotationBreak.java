@@ -63,7 +63,7 @@ public class RotationBreak extends Check implements PacketCheck {
                 needPostCheck = true;
             }
         } else if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
-            if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate)
+            if (player.packetStateData.lastPacketWasTeleport || player.packetStateData.lastPacketWasOnePointSeventeenDuplicate)
                 return;
             if (targetBlock != null) {
                 if (!didRayTraceHit(targetBlock)) {
