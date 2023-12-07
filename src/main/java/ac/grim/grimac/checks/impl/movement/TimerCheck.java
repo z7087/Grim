@@ -86,12 +86,16 @@ public class TimerCheck extends Check implements PacketCheck {
     public void doCheck(final PacketReceiveEvent event) {
         flyingPacketCount++;
         if (flyingPacketCount > 10) {
+            // vanilla can only runs up to 10 tick each gameloop, more means a new gameloop
             lastPlayerClock = lastMovementPlayerClock;
+            flyingPacketCount = 0;
         } else if (flyingPacketCount > 1 && WrapperPlayClientPlayerFlying.isFlying(event.getPacketType()) &&
                 !player.packetStateData.lastPacketWasTeleport && !player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+            // vanilla can only rotate once each gameloop, more means a new gameloop
             WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
             if (flying.hasRotationChanged()) {
                 lastPlayerClock = lastMovementPlayerClock;
+                flyingPacketCount = 0;
             }
         }
 
