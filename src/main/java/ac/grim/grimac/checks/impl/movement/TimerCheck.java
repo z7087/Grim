@@ -23,6 +23,8 @@ public class TimerCheck extends Check implements PacketCheck {
 
     boolean hasGottenMovementAfterTransaction = false;
 
+    int flyingPacketCount = 0;
+
     // Proof for this timer check
     // https://i.imgur.com/Hk2Wb6c.png
     //
@@ -56,10 +58,13 @@ public class TimerCheck extends Check implements PacketCheck {
 
     @Override
     public void onPacketReceive(final PacketReceiveEvent event) {
-        if (hasGottenMovementAfterTransaction && checkForTransaction(event.getPacketType())) {
+        if (hasGottenMovementAfterTransaction && isTransaction(event.getPacketType())) {
             knownPlayerClockTime = lastMovementPlayerClock;
             lastMovementPlayerClock = player.getPlayerClockAtLeast();
-            hasGottenMovementAfterTransaction = false;
+            if (player.packetStateData.lastTransactionPacketWasValid) {
+                hasGottenMovementAfterTransaction = false;
+                flyingPacketCount = 0;
+            }
         }
 
         if (!shouldCountPacketForTimer(event.getPacketType())) return;
@@ -72,6 +77,17 @@ public class TimerCheck extends Check implements PacketCheck {
 
 
     public void doCheck(final PacketReceiveEvent event) {
+        flyingPacketCount++;
+        if (flyingPacketCount > 10) {
+            lastMovementPlayerClock = player.getPlayerClockAtLeast();
+        } else if (flyingPacketCount > 1 && WrapperPlayClientPlayerFlying.isFlying(event.getPacketType()) &&
+                !player.packetStateData.lastPacketWasTeleport && !player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+            WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
+            if (flying.hasRotationChanged()) {
+                lastMovementPlayerClock = player.getPlayerClockAtLeast();
+            }
+        }
+
         if (timerBalanceRealTime > System.nanoTime()) {
             if (flag()) {
                 // Cancel the packet
@@ -90,10 +106,6 @@ public class TimerCheck extends Check implements PacketCheck {
         timerBalanceRealTime = Math.max(timerBalanceRealTime, lastMovementPlayerClock - clockDrift);
     }
 
-    public boolean checkForTransaction(PacketTypeCommon packetType) {
-        return packetType == PacketType.Play.Client.PONG ||
-                packetType == PacketType.Play.Client.WINDOW_CONFIRMATION;
-    }
 
     public boolean shouldCountPacketForTimer(PacketTypeCommon packetType) {
         // If not flying, or this was a teleport, or this was a duplicate 1.17 mojang stupidity packet
