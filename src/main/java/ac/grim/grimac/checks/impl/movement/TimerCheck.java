@@ -88,7 +88,7 @@ public class TimerCheck extends Check implements PacketCheck {
         if (flyingPacketCount > 10) {
             // vanilla can only runs up to 10 tick each gameloop, more means a new gameloop
             lastPlayerClock = lastMovementPlayerClock;
-            flyingPacketCount = 0;
+            flyingPacketCount = 0; // this doesnt matter cause the clock wont be added if player doenst send transaction but whatever
         } else if (flyingPacketCount > 1 && WrapperPlayClientPlayerFlying.isFlying(event.getPacketType()) &&
                 !player.packetStateData.lastPacketWasTeleport && !player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
             // vanilla can only rotate once each gameloop, more means a new gameloop
