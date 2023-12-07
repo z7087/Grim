@@ -26,6 +26,8 @@ public class TimerCheck extends Check implements PacketCheck {
 
     boolean hasGottenMovementAfterTransaction = false;
 
+    int flyingPacketCount = 0;
+
     // Proof for this timer check
     // https://i.imgur.com/Hk2Wb6c.png
     //
@@ -64,14 +66,15 @@ public class TimerCheck extends Check implements PacketCheck {
             knownPlayerClockTime = lastPlayerClock;
             lastPlayerClock = lastMovementPlayerClock;
             hasGottenMovementAfterTransaction = false;
+            flyingPacketCount = 0;
         }
 
         if (shouldCountPacketForTimer(event.getPacketType())) {
             hasGottenMovementAfterTransaction = true;
             timerBalanceRealTime += 50e6;
+            lastMovementPlayerClock = player.getPlayerClockAtLeast();
 
             doCheck(event);
-            lastMovementPlayerClock = player.getPlayerClockAtLeast();
         } else if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
             // 1.17 duplicate packet is in tick
             hasGottenMovementAfterTransaction = true;
@@ -81,6 +84,17 @@ public class TimerCheck extends Check implements PacketCheck {
 
 
     public void doCheck(final PacketReceiveEvent event) {
+        flyingPacketCount++;
+        if (flyingPacketCount > 10) {
+            lastPlayerClock = lastMovementPlayerClock;
+        } else if (flyingPacketCount > 1 && WrapperPlayClientPlayerFlying.isFlying(event.getPacketType()) &&
+                !player.packetStateData.lastPacketWasTeleport && !player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+            WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
+            if (flying.hasRotationChanged()) {
+                lastPlayerClock = lastMovementPlayerClock;
+            }
+        }
+
         if (timerBalanceRealTime > System.nanoTime()) {
             if (flag()) {
                 // Cancel the packet
