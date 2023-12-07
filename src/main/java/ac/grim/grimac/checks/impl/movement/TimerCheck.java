@@ -15,6 +15,9 @@ public class TimerCheck extends Check implements PacketCheck {
 
     // Default value is real time minus max keep-alive time
     long knownPlayerClockTime = (long) (System.nanoTime() - 6e10);
+    long lastPlayerClock = (long) (System.nanoTime() - 6e10);
+    // can we just use last transaction time to check?
+    // i use last gameloop time to check, idk why the other one branch false
     long lastMovementPlayerClock = (long) (System.nanoTime() - 6e10);
 
     // How long should the player be able to fall back behind their ping?
@@ -56,18 +59,24 @@ public class TimerCheck extends Check implements PacketCheck {
 
     @Override
     public void onPacketReceive(final PacketReceiveEvent event) {
-        if (hasGottenMovementAfterTransaction && checkForTransaction(event.getPacketType())) {
-            knownPlayerClockTime = lastMovementPlayerClock;
-            lastMovementPlayerClock = player.getPlayerClockAtLeast();
+        // transaction means a new gameloop, vaild or not doesnt matter here
+        if (hasGottenMovementAfterTransaction && isTransaction(event.getPacketType())) {
+            knownPlayerClockTime = lastPlayerClock;
+            lastPlayerClock = lastMovementPlayerClock;
             hasGottenMovementAfterTransaction = false;
         }
 
-        if (!shouldCountPacketForTimer(event.getPacketType())) return;
+        if (shouldCountPacketForTimer(event.getPacketType())) {
+            hasGottenMovementAfterTransaction = true;
+            timerBalanceRealTime += 50e6;
 
-        hasGottenMovementAfterTransaction = true;
-        timerBalanceRealTime += 50e6;
-
-        doCheck(event);
+            doCheck(event);
+            lastMovementPlayerClock = player.getPlayerClockAtLeast();
+        } else if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+            // 1.17 duplicate packet is in tick
+            hasGottenMovementAfterTransaction = true;
+            lastMovementPlayerClock = player.getPlayerClockAtLeast();
+        }
     }
 
 
@@ -87,12 +96,7 @@ public class TimerCheck extends Check implements PacketCheck {
             timerBalanceRealTime -= 50e6;
         }
 
-        timerBalanceRealTime = Math.max(timerBalanceRealTime, lastMovementPlayerClock - clockDrift);
-    }
-
-    public boolean checkForTransaction(PacketTypeCommon packetType) {
-        return packetType == PacketType.Play.Client.PONG ||
-                packetType == PacketType.Play.Client.WINDOW_CONFIRMATION;
+        timerBalanceRealTime = Math.max(timerBalanceRealTime, lastPlayerClock - clockDrift);
     }
 
     public boolean shouldCountPacketForTimer(PacketTypeCommon packetType) {
