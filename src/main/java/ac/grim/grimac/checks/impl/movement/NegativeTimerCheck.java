@@ -5,9 +5,11 @@ import ac.grim.grimac.checks.type.PostPredictionCheck;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.update.PredictionComplete;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
 
 @CheckData(name = "NegativeTimer", configName = "NegativeTimer", setback = 10)
 public class NegativeTimerCheck extends TimerCheck implements PostPredictionCheck {
+    int maxPingTransaction = 5;
 
     public NegativeTimerCheck(GrimPlayer player) {
         super(player);
@@ -15,23 +17,13 @@ public class NegativeTimerCheck extends TimerCheck implements PostPredictionChec
     }
 
     @Override
-    public void onPredictionComplete(final PredictionComplete predictionComplete) {
-        // We can't negative timer check a 1.9+ player who is standing still.
-        if (!player.canThePlayerBeCloseToZeroMovement(2) || !predictionComplete.isChecked()) {
-            timerBalanceRealTime = System.nanoTime() + clockDrift;
+    public void onPacketReceive(final PacketReceiveEvent event) {
+        // 1.17 duplicate packet is in tick
+        if (WrapperPlayClientPlayerFlying.isFlying(packetType) && !player.packetStateData.lastPacketWasTeleport) {
+            if ((System.nanoTime() - player.getPlayerClockAtLeast()) > maxPingTransaction * 1e9) {
+                player.timedOut();
+            }
         }
-
-        if (timerBalanceRealTime < lastMovementPlayerClock - clockDrift) {
-            int lostMS = (int) ((System.nanoTime() - timerBalanceRealTime) / 1e6);
-            flagAndAlert("-" + lostMS);
-            timerBalanceRealTime += 50e6;
-        }
-    }
-
-    @Override
-    public void doCheck(final PacketReceiveEvent event) {
-        // We don't know if the player is ticking stable, therefore we must wait until prediction
-        // determines this.  Do nothing here!
     }
 
     @Override
