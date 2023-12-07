@@ -18,6 +18,8 @@ public class NegativeTimerCheck extends TimerCheck implements PostPredictionChec
 
     @Override
     public void onPacketReceive(final PacketReceiveEvent event) {
+        if (player.disableGrim) return;
+        if (player.getSetbackTeleportUtil().lastKnownGoodPosition == null) return;
         // 1.17 duplicate packet is in tick
         if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType()) && !player.packetStateData.lastPacketWasTeleport) {
             if ((System.nanoTime() - player.getPlayerClockAtLeast()) > maxPingTransaction * 1e9) {
