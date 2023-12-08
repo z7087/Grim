@@ -25,6 +25,9 @@ public class TimerCheck extends Check implements PacketCheck {
     long clockDrift = (long) 120e6;
 
     boolean hasGottenMovementAfterTransaction = false;
+    // if a player send a 1.17 duplicate packet and send a transaction, he must ran and maybe skipped a tick
+    // patch out tick 1.17 duplicate packet maybe
+    boolean hasGottenDuplicateMovement = false;
 
     int flyingPacketCount = 0;
 
@@ -67,18 +70,25 @@ public class TimerCheck extends Check implements PacketCheck {
             lastPlayerClock = lastMovementPlayerClock;
             hasGottenMovementAfterTransaction = false;
             flyingPacketCount = 0;
+            if (hasGottenDuplicateMovement) {
+                // idk what can we do here
+                timerBalanceRealTime += 50e6;
+                hasGottenDuplicateMovement = false;
+            }
         }
 
         if (shouldCountPacketForTimer(event.getPacketType())) {
             hasGottenMovementAfterTransaction = true;
             timerBalanceRealTime += 50e6;
             lastMovementPlayerClock = player.getPlayerClockAtLeast();
+            hasGottenDuplicateMovement = false;
 
             doCheck(event);
         } else if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
             // 1.17 duplicate packet is in tick
             hasGottenMovementAfterTransaction = true;
             lastMovementPlayerClock = player.getPlayerClockAtLeast();
+            hasGottenDuplicateMovement = true;
         }
     }
 
