@@ -60,13 +60,21 @@ public class PacketPlayerCursor extends PacketListenerAbstract {
             Vector3i targetBlock = place.getBlockPosition();
             BlockFace face = place.getFace();
             Vector3f targetCursor = place.getCursorPosition();
-            if (player.hasCursor != 1 || !targetBlock.equals(player.cursorBlock) || face != player.cursorBlockFace || !targetCursor.equals(player.cursor)) {
+            if (player.hasCursor != 1 || !targetBlock.equals(player.cursorBlock) || face != player.cursorBlockFace) {
                 if (player.hasCursor != -1) {
                     CheckManagerListener.handleQueuedPlaces(player, false, 0, 0, System.currentTimeMillis());
                 }
                 player.hasCursor = 1;
                 player.cursorBlock = targetBlock;
                 player.cursorBlockFace = face;
+                player.cursor = targetCursor;
+            } else if (!targetCursor.equals(player.cursor)) {
+                if (player.cursor != null) {
+                    CheckManagerListener.handleQueuedPlaces(player, false, 0, 0, System.currentTimeMillis());
+                    player.hasCursor = 1;
+                    player.cursorBlock = targetBlock;
+                    player.cursorBlockFace = face;
+                }
                 player.cursor = targetCursor;
             }
         }
@@ -82,12 +90,19 @@ public class PacketPlayerCursor extends PacketListenerAbstract {
             Optional<Vector3f> target = useEntity.getTarget();
             if (target.isPresent()) {
                 Vector3f targetCursor = target.get();
-                if (player.hasCursor != 0 || !entityId.equals(player.cursorEntityId) || !targetCursor.equals(player.cursor)) {
+                if (player.hasCursor != 0 || !entityId.equals(player.cursorEntityId)) {
                     if (player.hasCursor != -1) {
                         CheckManagerListener.handleQueuedPlaces(player, false, 0, 0, System.currentTimeMillis());
                     }
                     player.hasCursor = 0;
                     player.cursorEntityId = entityId;
+                    player.cursor = targetCursor;
+                } else if (!targetCursor.equals(player.cursor)) {
+                    if (player.cursor != null) {
+                        CheckManagerListener.handleQueuedPlaces(player, false, 0, 0, System.currentTimeMillis());
+                        player.hasCursor = 0;
+                        player.cursorEntityId = entityId;
+                    }
                     player.cursor = targetCursor;
                 }
             } else {
