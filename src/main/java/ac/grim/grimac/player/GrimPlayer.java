@@ -33,6 +33,8 @@ import com.github.retrooper.packetevents.protocol.player.User;
 import com.github.retrooper.packetevents.protocol.world.BlockFace;
 import com.github.retrooper.packetevents.protocol.world.Dimension;
 import com.github.retrooper.packetevents.util.Vector3d;
+import com.github.retrooper.packetevents.util.Vector3f;
+import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import com.viaversion.viaversion.api.Via;
@@ -188,6 +190,16 @@ public class GrimPlayer implements GrimUser {
     public long lastBlockPlaceUseItem = 0;
     public AtomicInteger cancelledPackets = new AtomicInteger(0);
     public MainSupportingBlockData mainSupportingBlockData = new MainSupportingBlockData(null, false);
+    // -1=noCursor 0=entity 1=block
+    public int hasCursor = -1;
+    // if last cursor is entity, this shouldn't be null
+    public Integer cursorEntityId = null;
+    // if last cursor is block, this shouldn't be null
+    public Vector3i cursorBlock = null;
+    // if last cursor is block, this shouldn't be null
+    public BlockFace cursorBlockFace = null;
+    // null=we dont know
+    public Vector3f cursor = null;
 
     public void onPacketCancel() {
         if (spamThreshold != -1 && cancelledPackets.incrementAndGet() > spamThreshold) {
@@ -682,6 +694,14 @@ public class GrimPlayer implements GrimUser {
     @Override
     public Collection<? extends AbstractCheck> getChecks() {
         return checkManager.allChecks.values();
+    }
+
+    public void resetCursor() {
+        this.hasCursor = -1;
+        this.cursorEntityId = null;
+        this.cursorBlock = null;
+        this.cursorBlockFace = null;
+        this.cursor = null;
     }
 
 }
