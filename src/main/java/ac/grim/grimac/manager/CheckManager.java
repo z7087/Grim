@@ -10,6 +10,7 @@ import ac.grim.grimac.checks.impl.combat.Reach;
 import ac.grim.grimac.checks.impl.crash.*;
 import ac.grim.grimac.checks.impl.exploit.ExploitA;
 import ac.grim.grimac.checks.impl.exploit.ExploitB;
+import ac.grim.grimac.checks.impl.exploit.ExploitC;
 import ac.grim.grimac.checks.impl.groundspoof.NoFallA;
 import ac.grim.grimac.checks.impl.misc.ClientBrand;
 import ac.grim.grimac.checks.impl.misc.FastBreak;
@@ -130,6 +131,7 @@ public class CheckManager {
                 .build();
 
         prePredictionChecks = new ImmutableClassToInstanceMap.Builder<PacketCheck>()
+                .put(ExploitC.class, new ExploitC(player))
                 .put(TimerCheck.class, new TimerCheck(player))
                 .put(CrashA.class, new CrashA(player))
                 .put(CrashB.class, new CrashB(player))
