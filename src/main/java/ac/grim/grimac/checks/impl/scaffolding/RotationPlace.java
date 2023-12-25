@@ -120,7 +120,7 @@ public class RotationPlace extends BlockPlaceCheck {
         }
 
         // player's rotation didn't change, don't use lastRot
-        if (!place.isFlying()) {
+        if (!place.isFlying() || !place.hasLook()) {
             possibleLookDirs = Collections.singletonList(new Vector3f(yaw, pitch, 0));
         }
 
