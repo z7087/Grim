@@ -48,6 +48,7 @@ public class EnforceUseItemStupidity extends PacketListenerAbstract {
                 }
 
                 player.packetStateData.lastLastStupidity = player.packetStateData.lastStupidity;
+                player.packetStateData.lastStupidity = null;
                 player.packetStateData.lastMovementWasDefinitelyOnePointSeventeenDuplicate = true;
                 return;
             }
