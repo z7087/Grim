@@ -9,6 +9,8 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.protocol.world.BlockFace;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerBlockPlacement;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
 
 // This runs before anything else, so this way we can simulate receiving flying.
@@ -25,8 +27,9 @@ public class EnforceUseItemStupidity extends PacketListenerAbstract {
 
         // Stupidity packet only exists on 1.17+
         if (player.getClientVersion().isOlderThan(ClientVersion.V_1_17)) return;
+        boolean isUseItemPacket = isUseItem(event);
 
-        if (!player.packetStateData.detectedStupidity && event.getPacketType() == PacketType.Play.Client.USE_ITEM) {
+        if (!player.packetStateData.detectedStupidity && isUseItemPacket) {
             // The player MUST send a stupidity packet before use item
             player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=skipped_use");
             return;
@@ -35,7 +38,7 @@ public class EnforceUseItemStupidity extends PacketListenerAbstract {
         // If we received a believed stupidity packet, the next packet MUST be USE_ITEM.
         // If not, we were wrong or the client is attempting to fake stupidity.
         if (player.packetStateData.detectedStupidity) {
-            if (event.getPacketType() == PacketType.Play.Client.USE_ITEM) {
+            if (isUseItemPacket) {
                 // Valid stupidity packet.
                 player.packetStateData.detectedStupidity = false;
 
@@ -58,5 +61,14 @@ public class EnforceUseItemStupidity extends PacketListenerAbstract {
             player.packetStateData.detectedStupidity = false;
             PacketEvents.getAPI().getPlayerManager().receivePacket(player.bukkitPlayer, new WrapperPlayClientPlayerFlying(true, true, player.packetStateData.packetPlayerOnGround, player.packetStateData.lastStupidity));
         }
+    }
+    private boolean isUseItem(PacketReceiveEvent event) {
+        if (event.getPacketType() == PacketType.Play.Client.USE_ITEM)
+            return true;
+        else if (event.getPacketType() == PacketType.Play.Client.PLAYER_BLOCK_PLACEMENT) {
+            WrapperPlayClientPlayerBlockPlacement packet = new WrapperPlayClientPlayerBlockPlacement(event);
+            return packet.getFace() == BlockFace.OTHER;
+        }
+        return false;
     }
 }
