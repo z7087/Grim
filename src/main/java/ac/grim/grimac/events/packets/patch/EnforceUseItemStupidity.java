@@ -40,7 +40,7 @@ public class EnforceUseItemStupidity extends PacketListenerAbstract {
                 player.packetStateData.detectedStupidity = false;
 
                 // If the last movement was definitely a duplicate packet, and this one is too
-                if (player.packetStateData.lastMovementWasDefinitelyOnePointSeventeenDuplicate && player.packetStateData.lastLastStupidity != null) {
+                if (player.packetStateData.lastMovementWasDefinitelyOnePointSeventeenDuplicate && player.packetStateData.lastLastStupidity != null && player.packetStateData.lastStupidity != null) {
                     // The player cannot send two duplicate packets with a different look, rotation changes are always sent with a normal flying packet
                     if (player.xRot != player.packetStateData.lastLastStupidity.getYaw() || player.yRot != player.packetStateData.lastLastStupidity.getPitch()) {
                         player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=no_rotation");
