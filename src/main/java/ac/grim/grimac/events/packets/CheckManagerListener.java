@@ -332,17 +332,6 @@ public class CheckManagerListener extends PacketListenerAbstract {
             // Player can only send this stupidity packet when holding an item
             if (player.getInventory().getOffHand().isEmpty() && player.getInventory().getHeldItem().isEmpty()) return false;
 
-            // We detected this as a stupidity packet but due to lack of USE_ITEM after we were wrong
-            if (player.packetStateData.ignoreDuplicatePacket) {
-                player.packetStateData.ignoreDuplicatePacket = false;
-                return false;
-            }
-
-            player.packetStateData.detectedStupidity = true;
-            player.packetStateData.lastStupidity = location;
-            // Override location to force it to use the last real position of the player. Only yaw/pitch matters: https://github.com/GrimAnticheat/Grim/issues/1275#issuecomment-1872444018
-            flying.setLocation(new Location(player.filterMojangStupidityOnMojangStupidity, location.getYaw(), location.getPitch()));
-
             player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = true;
 
             if (player.xRot != location.getYaw() || player.yRot != location.getPitch()) {
@@ -383,7 +372,24 @@ public class CheckManagerListener extends PacketListenerAbstract {
             teleportData = flying.hasPositionChanged() && flying.hasRotationChanged() ? player.getSetbackTeleportUtil().checkTeleportQueue(position.getX(), position.getY(), position.getZ()) : new TeleportAcceptData();
             player.packetStateData.lastPacketWasTeleport = teleportData.isTeleport();
             // Teleports can't be stupidity packets
-            player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = !player.packetStateData.lastPacketWasTeleport && isMojangStupid(player, flying);
+            player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = !player.packetStateData.ignoreDuplicatePacket && !player.packetStateData.lastPacketWasTeleport && (stupidityResut = isMojangStupid(player, flying));
+
+            // We detected this as a stupidity packet but due to lack of USE_ITEM after we were wrong
+            if (player.packetStateData.ignoreDuplicatePacket) {
+                player.packetStateData.ignoreDuplicatePacket = false;
+            }
+
+            if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+                player.packetStateData.detectedStupidity = true;
+                player.packetStateData.lastStupidity = flying.getLocation();
+                // Override location to force it to use the last real position of the player. Only yaw/pitch matters: https://github.com/GrimAnticheat/Grim/issues/1275#issuecomment-1872444018
+                flying.setLocation(new Location(player.filterMojangStupidityOnMojangStupidity, flying.getLocation().getYaw(), flying.getLocation().getPitch()));
+            }
+            else {
+                player.packetStateData.lastLastStupidity = null;
+                player.packetStateData.lastStupidity = null;
+            }
+
         }
 
 
