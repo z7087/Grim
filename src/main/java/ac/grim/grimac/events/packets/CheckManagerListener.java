@@ -388,6 +388,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
             else {
                 player.packetStateData.lastLastStupidity = null;
                 player.packetStateData.lastStupidity = null;
+                player.packetStateData.lastMovementWasDefinitelyOnePointSeventeenDuplicate = false;
             }
 
         }
