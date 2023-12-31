@@ -372,7 +372,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
             teleportData = flying.hasPositionChanged() && flying.hasRotationChanged() ? player.getSetbackTeleportUtil().checkTeleportQueue(position.getX(), position.getY(), position.getZ()) : new TeleportAcceptData();
             player.packetStateData.lastPacketWasTeleport = teleportData.isTeleport();
             // Teleports can't be stupidity packets
-            player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = !player.packetStateData.ignoreDuplicatePacket && !player.packetStateData.lastPacketWasTeleport && (stupidityResut = isMojangStupid(player, flying));
+            player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = !player.packetStateData.ignoreDuplicatePacket && !player.packetStateData.lastPacketWasTeleport && isMojangStupid(player, flying);
 
             // We detected this as a stupidity packet but due to lack of USE_ITEM after we were wrong
             if (player.packetStateData.ignoreDuplicatePacket) {
