@@ -406,9 +406,6 @@ public class CheckManagerListener extends PacketListenerAbstract {
 
                 player.packetStateData.lastClaimedPosition = location.getPosition();
             }
-            else {
-                player.packetStateData.lastStupidity = null;
-            }
 
         }
 

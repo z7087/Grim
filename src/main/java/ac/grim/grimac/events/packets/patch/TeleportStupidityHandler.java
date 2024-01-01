@@ -12,6 +12,7 @@ import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.protocol.world.BlockFace;
+import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerBlockPlacement;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
 
@@ -45,7 +46,7 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
 
         if (player.packetStateData.confirmedTeleport) {
             boolean lastConfirmValid = false;
-            if (WrapperPlayClientPlayerFlying.isFlying(event)) {
+            if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
                 WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
                 lastConfirmValid = flying.hasPositionChanged() && flying.hasRotationChanged() && !flying.isOnGround();
             }
@@ -107,9 +108,9 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
                 }
             }
 
-            if (WrapperPlayClientPlayerFlying.isFlying(event)) {
+            if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
                 WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
-                if (checkStupidity && isMojangStupid(player, flying)) {
+                if (checkStupidity && CheckManagerListener.isMojangStupid(player, flying)) {
                     // This packet is likely a stupidity, cancel and save it util we can get its type
                     event.setCancelled(true);
                     player.packetStateData._disableListenerLogger = true;
