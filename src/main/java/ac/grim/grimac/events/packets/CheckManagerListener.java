@@ -361,7 +361,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
 
             Vector3d position = VectorUtils.clampVector(flying.getLocation().getPosition());
 
-            // If we can know the flying is definitely teleport
+            // If we can know the flying's type
             if (TeleportStupidityHandler.isSupportVersion(player.getClientVersion(), PacketEvents.getAPI().getServerManager().getVersion())) {
                 // Don't poll teleports if it is not definitely teleport
                 teleportData = player.packetStateData.lastPacketWasDefinitelyTeleport ? player.getSetbackTeleportUtil().checkTeleportQueue(position.getX(), position.getY(), position.getZ()) : new TeleportAcceptData();
@@ -384,10 +384,6 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = !player.packetStateData.lastPacketWasTeleport && isMojangStupid(player, flying);
             }
 
-
-            if (player.packetStateData.lastPacketWasDefinitelyOnePointSeventeenDuplicate) {
-                player.packetStateData.lastPacketWasDefinitelyOnePointSeventeenDuplicate = false;
-            }
 
             if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
                 Location location = flying.getLocation();
