@@ -1,7 +1,6 @@
 package ac.grim.grimac.manager.init.start;
 
 import ac.grim.grimac.events.packets.*;
-import ac.grim.grimac.events.packets.patch.EnforceUseItemStupidity;
 import ac.grim.grimac.events.packets.worldreader.BasePacketWorldReader;
 import ac.grim.grimac.events.packets.worldreader.PacketWorldReaderEight;
 import ac.grim.grimac.events.packets.worldreader.PacketWorldReaderEighteen;
