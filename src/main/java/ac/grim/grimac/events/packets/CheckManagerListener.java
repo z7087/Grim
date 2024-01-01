@@ -1,7 +1,9 @@
 package ac.grim.grimac.events.packets;
 
 import ac.grim.grimac.GrimAPI;
+import ac.grim.grimac.checks.impl.badpackets.BadPacketsU;
 import ac.grim.grimac.events.packets.patch.ResyncWorldUtil;
+import ac.grim.grimac.events.packets.patch.TeleportStupidityHandler;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.update.*;
 import ac.grim.grimac.utils.blockplace.BlockPlaceResult;
@@ -312,7 +314,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
         }
     }
 
-    private boolean isMojangStupid(GrimPlayer player, WrapperPlayClientPlayerFlying flying) {
+    public static boolean isMojangStupid(GrimPlayer player, WrapperPlayClientPlayerFlying flying) {
         final Location location = flying.getLocation();
         double threshold = player.getMovementThreshold();
         // Don't check duplicate 1.17 packets (Why would you do this mojang?)
@@ -320,7 +322,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
         //
         // removed a large rant, but I'm keeping this out of context insult below
         // EVEN A BUNCH OF MONKEYS ON A TYPEWRITER COULDNT WRITE WORSE NETCODE THAN MOJANG
-        if (!player.packetStateData.lastPacketWasTeleport && flying.hasPositionChanged() && flying.hasRotationChanged() &&
+        if (flying.hasPositionChanged() && flying.hasRotationChanged() &&
                 // Ground status will never change in this stupidity packet
                 ((flying.isOnGround() == player.packetStateData.packetPlayerOnGround
                         // Mojang added this stupid mechanic in 1.17
@@ -332,18 +334,6 @@ public class CheckManagerListener extends PacketListenerAbstract {
             // Player can only send this stupidity packet when holding an item
             if (player.getInventory().getOffHand().isEmpty() && player.getInventory().getHeldItem().isEmpty()) return false;
 
-            player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = true;
-
-            if (player.xRot != location.getYaw() || player.yRot != location.getPitch()) {
-                player.lastXRot = player.xRot;
-                player.lastYRot = player.yRot;
-            }
-
-            // Take the pitch and yaw, just in case we were wrong about this being a stupidity packet
-            player.xRot = location.getYaw();
-            player.yRot = location.getPitch();
-
-            player.packetStateData.lastClaimedPosition = location.getPosition();
             return true;
         }
         return false;
@@ -354,6 +344,8 @@ public class CheckManagerListener extends PacketListenerAbstract {
         if (event.getConnectionState() != ConnectionState.PLAY) return;
         GrimPlayer player = GrimAPI.INSTANCE.getPlayerDataManager().getPlayer(event.getUser());
         if (player == null) return;
+
+        if (player.packetStateData._disableListenerLogger) return;
 
         // Determine if teleport BEFORE we call the pre-prediction vehicle
         if (event.getPacketType() == PacketType.Play.Client.VEHICLE_MOVE) {
@@ -368,27 +360,54 @@ public class CheckManagerListener extends PacketListenerAbstract {
             WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
 
             Vector3d position = VectorUtils.clampVector(flying.getLocation().getPosition());
-            // Teleports must be POS LOOK
-            teleportData = flying.hasPositionChanged() && flying.hasRotationChanged() ? player.getSetbackTeleportUtil().checkTeleportQueue(position.getX(), position.getY(), position.getZ()) : new TeleportAcceptData();
-            player.packetStateData.lastPacketWasTeleport = teleportData.isTeleport();
-            // Teleports can't be stupidity packets
-            player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = !player.packetStateData.ignoreDuplicatePacket && !player.packetStateData.lastPacketWasTeleport && isMojangStupid(player, flying);
 
-            // We detected this as a stupidity packet but due to lack of USE_ITEM after we were wrong
-            if (player.packetStateData.ignoreDuplicatePacket) {
-                player.packetStateData.ignoreDuplicatePacket = false;
+            // If we can know the flying is definitely teleport
+            if (TeleportStupidityHandler.isSupportVersion(player.getClientVersion(), PacketEvents.getAPI().getServerManager().getVersion())) {
+                // Don't poll teleports if it is not definitely teleport
+                teleportData = player.packetStateData.lastPacketWasDefinitelyTeleport ? player.getSetbackTeleportUtil().checkTeleportQueue(position.getX(), position.getY(), position.getZ()) : new TeleportAcceptData();
+                player.packetStateData.lastPacketWasTeleport = teleportData.isTeleport();
+                if (player.packetStateData.lastPacketWasDefinitelyTeleport && !player.packetStateData.lastPacketWasTeleport) {
+                    player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=no_valid_teleport");
+                }
+                player.packetStateData.lastPacketWasDefinitelyTeleport = false;
+
+                // We already know its type
+                player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = player.packetStateData.lastPacketWasDefinitelyOnePointSeventeenDuplicate;
+                player.packetStateData.lastPacketWasDefinitelyOnePointSeventeenDuplicate = false;
+            }
+            else {
+                // Teleports must be POS LOOK
+                teleportData = flying.hasPositionChanged() && flying.hasRotationChanged() ? player.getSetbackTeleportUtil().checkTeleportQueue(position.getX(), position.getY(), position.getZ()) : new TeleportAcceptData();
+                player.packetStateData.lastPacketWasTeleport = teleportData.isTeleport();
+
+                // Teleports can't be stupidity packets
+                player.packetStateData.lastPacketWasOnePointSeventeenDuplicate = !player.packetStateData.lastPacketWasTeleport && isMojangStupid(player, flying);
+            }
+
+
+            if (player.packetStateData.lastPacketWasDefinitelyOnePointSeventeenDuplicate) {
+                player.packetStateData.lastPacketWasDefinitelyOnePointSeventeenDuplicate = false;
             }
 
             if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
-                player.packetStateData.detectedStupidity = true;
-                player.packetStateData.lastStupidity = flying.getLocation();
+                Location location = flying.getLocation();
+
                 // Override location to force it to use the last real position of the player. Only yaw/pitch matters: https://github.com/GrimAnticheat/Grim/issues/1275#issuecomment-1872444018
-                flying.setLocation(new Location(player.filterMojangStupidityOnMojangStupidity, flying.getLocation().getYaw(), flying.getLocation().getPitch()));
+                flying.setLocation(new Location(player.filterMojangStupidityOnMojangStupidity, location.getYaw(), location.getPitch()));
+
+                if (player.xRot != location.getYaw() || player.yRot != location.getPitch()) {
+                    player.lastXRot = player.xRot;
+                    player.lastYRot = player.yRot;
+                }
+
+                // Take the pitch and yaw, just in case we were wrong about this being a stupidity packet
+                player.xRot = location.getYaw();
+                player.yRot = location.getPitch();
+
+                player.packetStateData.lastClaimedPosition = location.getPosition();
             }
             else {
-                player.packetStateData.lastLastStupidity = null;
                 player.packetStateData.lastStupidity = null;
-                player.packetStateData.lastMovementWasDefinitelyOnePointSeventeenDuplicate = false;
             }
 
         }
@@ -686,10 +705,6 @@ public class CheckManagerListener extends PacketListenerAbstract {
 
         if (!player.packetStateData.lastPacketWasTeleport) {
             player.packetStateData.packetPlayerOnGround = onGround;
-        }
-
-        if (!player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
-            player.packetStateData.lastMovementWasDefinitelyOnePointSeventeenDuplicate = false;
         }
 
         if (hasLook) {

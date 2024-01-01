@@ -19,7 +19,7 @@ public class PacketManager implements Initable {
 
         PacketEvents.getAPI().getEventManager().registerListener(new PacketConfigurationListener());
         PacketEvents.getAPI().getEventManager().registerListener(new PacketPlayerJoinQuit());
-        PacketEvents.getAPI().getEventManager().registerListener(new PacketPingListener());
+        PacketEvents.getAPI().getEventManager().registerListener(new PacketLowestSorter());
         PacketEvents.getAPI().getEventManager().registerListener(new PacketPlayerDigging());
         PacketEvents.getAPI().getEventManager().registerListener(new PacketPlayerAttack());
         PacketEvents.getAPI().getEventManager().registerListener(new PacketEntityAction());
@@ -30,7 +30,6 @@ public class PacketManager implements Initable {
         PacketEvents.getAPI().getEventManager().registerListener(new PacketPlayerRespawn());
         PacketEvents.getAPI().getEventManager().registerListener(new CheckManagerListener());
         PacketEvents.getAPI().getEventManager().registerListener(new PacketPlayerSteer());
-        PacketEvents.getAPI().getEventManager().registerListener(new EnforceUseItemStupidity());
 
         if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_18)) {
             PacketEvents.getAPI().getEventManager().registerListener(new PacketWorldReaderEighteen());

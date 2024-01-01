@@ -9,9 +9,10 @@ import com.github.retrooper.packetevents.util.Vector3d;
 public class PacketStateData {
     public boolean packetPlayerOnGround = false;
     public boolean lastPacketWasTeleport = false;
-    public boolean ignoreDuplicatePacket;
-    public boolean detectedStupidity, lastMovementWasDefinitelyOnePointSeventeenDuplicate;
-    public Location lastStupidity, lastLastStupidity;
+    public boolean confirmedTeleport = false;
+    public boolean lastPacketWasDefinitelyTeleport = false;
+    public Location lastLikelyStupidity = null;
+    public boolean lastPacketWasDefinitelyOnePointSeventeenDuplicate = false;
     public boolean lastPacketWasOnePointSeventeenDuplicate = false;
     public boolean lastTransactionPacketWasValid = false;
     public int lastSlotSelected;
@@ -28,4 +29,7 @@ public class PacketStateData {
 
     public float lastHealth, lastSaturation;
     public int lastFood;
+
+    public boolean _disableLowestLogger = false;
+    public boolean _disableListenerLogger = false;
 }

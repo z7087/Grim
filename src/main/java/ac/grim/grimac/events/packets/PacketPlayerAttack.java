@@ -70,6 +70,8 @@ public class PacketPlayerAttack extends PacketListenerAbstract {
             GrimPlayer player = GrimAPI.INSTANCE.getPlayerDataManager().getPlayer(event.getUser());
             if (player == null) return;
 
+            if (player.packetStateData._disableListenerLogger) return;
+
             player.minPlayerAttackSlow = 0;
         }
     }
