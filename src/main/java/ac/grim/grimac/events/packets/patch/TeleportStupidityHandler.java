@@ -29,8 +29,11 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
         if (player == null) return;
 
         // Ignore resend
-        if (player.packetStateData._disableLowestLogger)
+        if (player.packetStateData._disableLowestLogger) {
+            if (!WrapperPlayClientPlayerFlying.isFlying(event.getPacketType()))
+                player.checkManager.getPacketCheck(BadPacketsU.class).alert("type=1 "+event.getPacketType());
             return;
+        }
 
         // If we cancelled a likely stupidity, this is the next packet, reset disablelogger
         if (player.packetStateData._disableListenerLogger)
@@ -49,12 +52,10 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
             if (player.packetStateData.lastLikelyStupidity == null && isUseItemPacket) {
                 // The player MUST send a stupidity packet before use item
                 player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=skipped_use");
-                return;
             }
-
             // If we received a believed stupidity packet, the next packet MUST be USE_ITEM.
             // If not, we were wrong or the client is attempting to fake stupidity.
-            if (player.packetStateData.lastLikelyStupidity != null) {
+            else if (player.packetStateData.lastLikelyStupidity != null) {
                 if (isUseItemPacket) {
                     // The last packet is definitely a stupidity, resend it as stupidity
                     player.packetStateData.lastPacketWasDefinitelyOnePointSeventeenDuplicate = true;
@@ -92,6 +93,7 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
                     event.setCancelled(true);
                     player.packetStateData._disableListenerLogger = true;
                     player.packetStateData.lastLikelyStupidity = flying.getLocation();
+                    return;
                 }
             }
 
@@ -105,6 +107,8 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
             }
 
             if (lastConfirmValid) {
+                if (player.packetStateData.lastPacketWasDefinitelyTeleport)
+                    player.checkManager.getPacketCheck(BadPacketsU.class).alert("type=2");
                 player.packetStateData.lastPacketWasDefinitelyTeleport = true;
             } else {
                 player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=invalid_confirm_teleport");
