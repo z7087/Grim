@@ -48,7 +48,7 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
             boolean lastConfirmValid = false;
             if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
                 WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
-                lastConfirmValid = flying.hasPositionChanged() && flying.hasRotationChanged() && !flying.isOnGround();
+                lastConfirmValid = flying.hasPositionChanged() && flying.hasRotationChanged();
             }
 
             if (lastConfirmValid) {
