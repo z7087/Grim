@@ -30,8 +30,6 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
 
         // Ignore resend
         if (player.packetStateData._disableLowestLogger) {
-            if (!WrapperPlayClientPlayerFlying.isFlying(event.getPacketType()))
-                player.checkManager.getPacketCheck(BadPacketsU.class).alert("type=1 "+event.getPacketType());
             return;
         }
 
@@ -107,8 +105,6 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
             }
 
             if (lastConfirmValid) {
-                if (player.packetStateData.lastPacketWasDefinitelyTeleport)
-                    player.checkManager.getPacketCheck(BadPacketsU.class).alert("type=2");
                 player.packetStateData.lastPacketWasDefinitelyTeleport = true;
             } else {
                 player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=invalid_confirm_teleport");
