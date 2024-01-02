@@ -42,29 +42,6 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
         if (!isSupportVersion(player.getClientVersion(), PacketEvents.getAPI().getServerManager().getVersion()))
             return;
 
-        boolean checkStupidity = true;
-
-        if (player.packetStateData.confirmedTeleport) {
-            boolean lastConfirmValid = false;
-            if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
-                WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
-                lastConfirmValid = flying.hasPositionChanged() && flying.hasRotationChanged();
-            }
-
-            if (lastConfirmValid) {
-                player.packetStateData.lastPacketWasDefinitelyTeleport = true;
-                checkStupidity = false; // this should be teleport, do not use stupidity check on it, and check teleport queue in checkmanagerlistener later
-            } else {
-                player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=invalid_confirm_teleport");
-            }
-
-            player.packetStateData.confirmedTeleport = false;
-        }
-
-        if (event.getPacketType() == PacketType.Play.Client.TELEPORT_CONFIRM) {
-            player.packetStateData.confirmedTeleport = true;
-        }
-
         // Stupidity packet only exists on 1.17+
         if (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_17)) {
             boolean isUseItemPacket = isUseItem(event);
@@ -110,7 +87,7 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
 
             if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
                 WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
-                if (checkStupidity && CheckManagerListener.isMojangStupid(player, flying)) {
+                if (!player.packetStateData.confirmedTeleport && CheckManagerListener.isMojangStupid(player, flying)) {
                     // This packet is likely a stupidity, cancel and save it util we can get its type
                     event.setCancelled(true);
                     player.packetStateData._disableListenerLogger = true;
@@ -118,6 +95,26 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
                 }
             }
 
+        }
+
+        if (player.packetStateData.confirmedTeleport) {
+            boolean lastConfirmValid = false;
+            if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
+                WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
+                lastConfirmValid = flying.hasPositionChanged() && flying.hasRotationChanged();
+            }
+
+            if (lastConfirmValid) {
+                player.packetStateData.lastPacketWasDefinitelyTeleport = true;
+            } else {
+                player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=invalid_confirm_teleport");
+            }
+
+            player.packetStateData.confirmedTeleport = false;
+        }
+
+        if (event.getPacketType() == PacketType.Play.Client.TELEPORT_CONFIRM) {
+            player.packetStateData.confirmedTeleport = true;
         }
     }
 
