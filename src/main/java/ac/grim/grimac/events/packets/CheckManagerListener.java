@@ -367,7 +367,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 teleportData = player.packetStateData.lastPacketWasDefinitelyTeleport ? player.getSetbackTeleportUtil().checkTeleportQueue(position.getX(), position.getY(), position.getZ()) : new TeleportAcceptData();
                 player.packetStateData.lastPacketWasTeleport = teleportData.isTeleport();
                 if (player.packetStateData.lastPacketWasDefinitelyTeleport && !player.packetStateData.lastPacketWasTeleport) {
-                    player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=no_valid_teleport transid="+player.lastTransactionReceived.get()+" rtransid="+player.getSetbackTeleportUtil().pendingTeleports.peek().getTransaction()+" x="+position.getX()+" rx="+player.getSetbackTeleportUtil().pendingTeleports.peek().getLocation().getX()+" y="+position.getY()+" ry="+player.getSetbackTeleportUtil().pendingTeleports.peek().getLocation().getY()+" z="+position.getZ()+" rz="+player.getSetbackTeleportUtil().pendingTeleports.peek().getLocation().getZ());
+                    player.checkManager.getPacketCheck(BadPacketsU.class).flagAndAlert("type=no_valid_teleport");
                 }
                 player.packetStateData.lastPacketWasDefinitelyTeleport = false;
 
