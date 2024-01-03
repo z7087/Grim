@@ -87,7 +87,7 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
             if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
                 WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
                 if (!player.packetStateData.confirmedTeleport && CheckManagerListener.isMojangStupid(player, flying)) {
-                    // This packet is likely a stupidity, cancel and save it util we can get its type
+                    // This packet is likely a stupidity, cancel and save it until we can get its type
                     event.setCancelled(true);
                     player.packetStateData._disableListenerLogger = true;
                     player.packetStateData.lastLikelyStupidity = flying.getLocation();

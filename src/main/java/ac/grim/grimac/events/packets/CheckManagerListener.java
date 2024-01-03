@@ -332,7 +332,8 @@ public class CheckManagerListener extends PacketListenerAbstract {
                         // If the player was in a vehicle, has position and look, and wasn't a teleport, then it was this stupid packet
                         || player.compensatedEntities.getSelf().inVehicle())) {
             // Player can only send this stupidity packet when holding an item
-            if (player.getInventory().getOffHand().isEmpty() && player.getInventory().getHeldItem().isEmpty()) return false;
+            // Don't check this if we are in a legacy server cause via can give players shield
+            if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_9) && player.getInventory().getOffHand().isEmpty() && player.getInventory().getHeldItem().isEmpty()) return false;
 
             return true;
         }
