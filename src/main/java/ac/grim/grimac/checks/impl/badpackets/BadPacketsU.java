@@ -51,7 +51,7 @@ public class BadPacketsU extends Check implements PacketCheck {
                     if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate && flying.getLocation().getYaw() == lastStupidityLook.getX() && flying.getLocation().getPitch() == lastStupidityLook.getY()) {
                         // player sends a duplicate stupidity, deny it?
                         if (shouldModifyPackets()) {
-                            //event.setCancelled(true);
+                            event.setCancelled(true);
                         }
                     }
                     lastStupidityLook = null;
