@@ -18,7 +18,7 @@ public class PacketManager implements Initable {
 
         PacketEvents.getAPI().getEventManager().registerListener(new PacketConfigurationListener());
         PacketEvents.getAPI().getEventManager().registerListener(new PacketPlayerJoinQuit());
-        PacketEvents.getAPI().getEventManager().registerListener(new PacketLowestSorter());
+        PacketEvents.getAPI().getEventManager().registerListener(new ListenerLowestSorter());
         PacketEvents.getAPI().getEventManager().registerListener(new PacketPlayerDigging());
         PacketEvents.getAPI().getEventManager().registerListener(new PacketPlayerAttack());
         PacketEvents.getAPI().getEventManager().registerListener(new PacketEntityAction());

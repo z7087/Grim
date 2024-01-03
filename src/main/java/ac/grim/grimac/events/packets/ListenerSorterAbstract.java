@@ -1,21 +1,20 @@
 package ac.grim.grimac.events.packets;
 
-import ac.grim.grimac.events.packets.patch.TeleportStupidityHandler;
 import com.github.retrooper.packetevents.event.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// just a way to sort lowest listeners
-public class PacketLowestSorter extends PacketListenerAbstract {
+public class ListenerSorterAbstract extends PacketListenerAbstract {
 
-    private List<PacketListenerAbstract> listenerList = new ArrayList<PacketListenerAbstract>();
+    protected List<PacketListenerAbstract> listenerList = new ArrayList<PacketListenerAbstract>();
 
-    public PacketLowestSorter() {
-        super(PacketListenerPriority.LOWEST);
+    public ListenerSorterAbstract(PacketListenerPriority priority) {
+        super(priority);
+    }
 
-        listenerList.add(new TeleportStupidityHandler());
-        listenerList.add(new PacketPingListener());
+    public ListenerSorterAbstract() {
+        super();
     }
 
     @Override
