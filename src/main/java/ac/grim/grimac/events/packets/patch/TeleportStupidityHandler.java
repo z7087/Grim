@@ -30,6 +30,8 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
 
         // Ignore resend
         if (player.packetStateData._disableLowestLogger) {
+                // if this does alert, it is blocking-and-receive before some packet else, or it is add-to-queue
+                player.checkManager.getPacketCheck(BadPacketsU.class).alert("this is a resend");
             return;
         }
 
@@ -54,6 +56,7 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
             // If we received a believed stupidity packet, the next packet MUST be USE_ITEM.
             // If not, we were wrong or the client is attempting to fake stupidity.
             else if (player.packetStateData.lastLikelyStupidity != null) {
+                // What does receive packet do?
                 if (isUseItemPacket) {
                     // The last packet is definitely a stupidity, resend it as stupidity
                     player.packetStateData.lastPacketWasDefinitelyOnePointSeventeenDuplicate = true;
