@@ -328,7 +328,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
                         // Mojang added this stupid mechanic in 1.17
                         && (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_17) &&
                         // Due to 0.03, we can't check exact position, only within 0.03
-                        player.filterMojangStupidityOnMojangStupidity.distanceSquared(location.getPosition()) <= threshold * threshold))
+                        (player.filterMojangStupidityOnMojangStupidity.distanceSquared(location.getPosition()) <= threshold * threshold || (player.filterMojangStupidityOnMojangStupidity.distanceSquared(location.getPosition()) <= threshold * threshold * 2 && player.packetStateData.lastClaimedPosition.distanceSquared(location.getPosition()) == 0))))
                         // If the player was in a vehicle, has position and look, and wasn't a teleport, then it was this stupid packet
                         || player.compensatedEntities.getSelf().inVehicle())) {
             // Player can only send this stupidity packet when holding an item
@@ -718,7 +718,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
             final PositionUpdate update = new PositionUpdate(new Vector3d(player.x, player.y, player.z), position, onGround, teleportData.getSetback(), teleportData.getTeleportData(), teleportData.isTeleport());
 
             // Stupidity doesn't care about 0.03
-            if (!player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+            if (!player.packetStateData.lastPacketWasTeleport && !player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
                 player.filterMojangStupidityOnMojangStupidity = clampVector;
             }
 
