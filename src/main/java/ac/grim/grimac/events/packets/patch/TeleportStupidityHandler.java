@@ -30,7 +30,7 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
 
         // Ignore resend
         if (player.packetStateData._disableLowestLogger) {
-            player.checkManager.getPacketCheck(BadPacketsU.class).alert("test type="+event.getPacketType());
+            // PacketType always PosLook here
             return;
         }
 
