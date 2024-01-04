@@ -388,9 +388,9 @@ public class CheckManagerListener extends PacketListenerAbstract {
 
 
             if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
-
+                Vector3d lastPos = new Vector3d(player.x, player.y, player.z);
                 // Override location to force it to use the last real position of the player. Only yaw/pitch matters: https://github.com/GrimAnticheat/Grim/issues/1275#issuecomment-1872444018
-                flying.setLocation(new Location(player.packetStateData.lastClaimedPosition, flying.getLocation().getYaw(), flying.getLocation().getPitch()));
+                flying.setLocation(new Location(lastPos, flying.getLocation().getYaw(), flying.getLocation().getPitch()));
 
                 Location location = flying.getLocation();
 
