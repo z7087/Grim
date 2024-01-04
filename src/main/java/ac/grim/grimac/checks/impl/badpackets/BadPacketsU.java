@@ -63,7 +63,7 @@ public class BadPacketsU extends Check implements PacketCheck {
                     }
                 }
             }
-            if (!player.packetStateData.lastPacketWasOnePointSeventeenDuplicate)
+            if (!player.packetStateData.lastPacketWasTeleport && !player.packetStateData.lastPacketWasOnePointSeventeenDuplicate)
                 lastNonStupidityLook = new Vector3f(player.xRot, player.yRot, 0f);
         }
 
