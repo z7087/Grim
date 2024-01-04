@@ -329,8 +329,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
                         && (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_17) &&
                         // Due to 0.03, we can't check exact position, only within 0.03
                         // Stupidity can have exactly same pos with last normal/teleport flying packet or close to last normal flying packet
-                        // But players can't move to last normal flying packet with all tick skipped if last teleport(if exists) not close to last normal flying
-                        (player.packetStateData.lastClaimedPosition.distanceSquared(location.getPosition()) == 0.0 || (player.packetStateData.lastClaimedPosition.distanceSquared(player.filterMojangStupidityOnMojangStupidity) <= threshold * threshold * 2 && player.filterMojangStupidityOnMojangStupidity.distanceSquared(location.getPosition()) <= threshold * threshold))))
+                        (player.packetStateData.lastClaimedPosition.distanceSquared(location.getPosition()) == 0.0 || player.filterMojangStupidityOnMojangStupidity.distanceSquared(location.getPosition()) <= threshold * threshold)))
                         // If the player was in a vehicle, has position and look, and wasn't a teleport, then it was this stupid packet
                         || player.compensatedEntities.getSelf().inVehicle())) {
             // Player can only send this stupidity packet when holding an item
@@ -389,10 +388,11 @@ public class CheckManagerListener extends PacketListenerAbstract {
 
 
             if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
-                Location location = flying.getLocation();
 
                 // Override location to force it to use the last real position of the player. Only yaw/pitch matters: https://github.com/GrimAnticheat/Grim/issues/1275#issuecomment-1872444018
-                flying.setLocation(new Location(player.filterMojangStupidityOnMojangStupidity, location.getYaw(), location.getPitch()));
+                flying.setLocation(new Location(player.packetStateData.lastClaimedPosition, location.getYaw(), location.getPitch()));
+
+                Location location = flying.getLocation();
 
                 if (player.xRot != location.getYaw() || player.yRot != location.getPitch()) {
                     player.lastXRot = player.xRot;
