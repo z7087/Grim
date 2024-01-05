@@ -9,6 +9,7 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
 
@@ -40,6 +41,13 @@ public class BadPacketsU extends Check implements PacketCheck {
             return;
         }
 
+        if (isTransaction(event.getPacketType())) {
+            if (lastStupidityLook != null) {
+                // Deny stupidity out ticks
+                // Should be same as another impossible stupidity check, or i made mistake
+                flagAndAlert("type=impossible_stupidity_gameloop");
+            }
+        }
         if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
             WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
 
@@ -58,6 +66,13 @@ public class BadPacketsU extends Check implements PacketCheck {
                 }
 
                 if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+                    // This is the real pos in packet
+                    Vector3d stupidityPos = player.packetStateData.lastClaimedPosition;
+                    // If the real pos is not equals last reported pos, it means player skipped ticks after a teleport or position report, predict engine it with this pos and last normal flying look
+                    if (stupidityPos.getX() != player.x || stupidityPos.getY() != player.y || stupidityPos.getZ() != player.z) {
+                        // but idk how to predictengine :(
+                        //balabala.abab(stupidityPos, lastNonStupidityLook.getX(), lastNonStupidityLook.getY());
+                    }
                     if (flying.getLocation().getYaw() != lastNonStupidityLook.getX() || flying.getLocation().getPitch() != lastNonStupidityLook.getY()) {
                         lastStupidityLook = new Vector3f(flying.getLocation().getYaw(), flying.getLocation().getPitch(), 0f);
                     }
