@@ -165,6 +165,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
     }
 
     public static void handleQueuedPlaces(GrimPlayer player, boolean isFlying, boolean hasLook, float pitch, float yaw, long now) {
+        player.resetCursor();
         // Handle queue'd block places
         BlockPlaceSnapshot snapshot;
         while ((snapshot = player.placeUseItemPackets.poll()) != null) {
