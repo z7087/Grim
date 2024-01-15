@@ -232,7 +232,7 @@ public class CheckManager {
         }
     }
 
-    public void onPostFlyingBlockPlace(final BlockPlace place) {
+    public void onPostFlyingBlockPlace(final PostBlockPlace place) {
         for (BlockPlaceCheck check : blockPlaceCheck.values()) {
             check.onPostFlyingBlockPlace(place);
         }
