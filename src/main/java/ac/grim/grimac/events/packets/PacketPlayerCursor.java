@@ -21,7 +21,7 @@ import java.util.Optional;
 public class PacketPlayerCursor extends PacketListenerAbstract {
 
     public PacketPlayerCursor() {
-        super(PacketListenerPriority.LOW);
+        super(PacketListenerPriority.LOWEST);
     }
 
     @Override
