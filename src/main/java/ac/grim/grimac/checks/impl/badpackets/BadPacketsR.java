@@ -19,7 +19,7 @@ public class BadPacketsR extends Check implements PacketCheck {
         super(player);
     }
 
-    private long lastTransReceivedTime = -1;
+    private long lastTransReceivedTime = -1; // useless?
     private long lastTransSentTime = -1;
     private int skippedTicks = 0;
     private Status clientStatus = Status.outTick;
@@ -65,12 +65,12 @@ public class BadPacketsR extends Check implements PacketCheck {
             lastTransReceivedTime = -1;
             lastTransSentTime = -1;
             skippedTicks = 0;
-            clientStatus = Status.inTick;
+            clientStatus = Status.outTick;
         } else if (event.getPacketType() == PacketType.Play.Client.STEER_VEHICLE && player.compensatedEntities.getSelf().inVehicle()) {
             lastTransReceivedTime = -1;
             lastTransSentTime = -1;
             skippedTicks = 0;
-            clientStatus = Status.inTick;
+            clientStatus = Status.outTick;
         }
     }
 
