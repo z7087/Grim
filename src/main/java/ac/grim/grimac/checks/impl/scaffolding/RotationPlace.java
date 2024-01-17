@@ -65,7 +65,7 @@ public class RotationPlace extends BlockPlaceCheck {
                 }
                 if (flag) {
                     flagBuffer = 1;
-                    if (flagAndAlert("pre-flying-impossible-cursor") && shouldModifyPackets() && shouldCancel()) {
+                    if (flagAndAlert("pre-flying-impossible-cursor "+place.getCursor()) && shouldModifyPackets() && shouldCancel()) {
                         place.resync();
                     }
                 }
