@@ -22,6 +22,7 @@ public class BadPacketsR extends Check implements PacketCheck {
     private long lastTransReceivedTime = -1;
     private long lastTransSentTime = -1;
     private int skippedTicks = 0;
+    private Status clientStatus = Status.outTick;
 
     // let's hope clients won't gc in process packets
     @Override
