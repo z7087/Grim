@@ -274,6 +274,10 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 StateType placedAgainst = blockPlace.getPlacedAgainstMaterial();
                 if ((player.getClientVersion().isOlderThan(ClientVersion.V_1_8) && (placedAgainst == StateTypes.IRON_TRAPDOOR || placedAgainst == StateTypes.IRON_DOOR))
                         || Materials.isClientSideInteractable(placedAgainst)) {
+
+                    if (!player.compensatedEntities.getSelf().inVehicle()) {
+                        player.checkManager.onPostFlyingBlockPlace(blockPlace);
+                    }
                     Vector3i location = blockPlace.getPlacedAgainstBlockLocation();
                     player.compensatedWorld.tickOpenable(location.getX(), location.getY(), location.getZ());
                     return;
@@ -283,6 +287,9 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 // This method is for when the block doesn't always consume the click
                 // This causes a ton of desync's but mojang doesn't seem to care...
                 if (ConsumesBlockPlace.consumesPlace(player, player.compensatedWorld.getWrappedBlockStateAt(blockPlace.getPlacedAgainstBlockLocation()), blockPlace)) {
+                    if (!player.compensatedEntities.getSelf().inVehicle()) {
+                        player.checkManager.onPostFlyingBlockPlace(blockPlace);
+                    }
                     return;
                 }
             }
@@ -509,7 +516,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
                     }
                 }
 
-                if ((placedWith.getType().getPlacedType() != null || placedWith.getType() == ItemTypes.FIRE_CHARGE) && !player.compensatedEntities.getSelf().inVehicle())
+                if (!player.compensatedEntities.getSelf().inVehicle())
                     player.checkManager.onBlockPlace(blockPlace);
 
                 if (event.isCancelled() || blockPlace.isCancelled() || player.getSetbackTeleportUtil().shouldBlockMovement()) { // The player tried placing blocks in air/water
