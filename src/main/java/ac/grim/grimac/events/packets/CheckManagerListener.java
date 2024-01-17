@@ -269,6 +269,20 @@ public class CheckManagerListener extends PacketListenerAbstract {
             if ((!player.isSneaking || onlyAir) && place.getHand() == InteractionHand.MAIN_HAND) {
                 Vector3i blockPosition = place.getBlockPosition();
                 PostBlockPlace blockPlace = new PostBlockPlace(player, place.getHand(), blockPosition, place.getFace(), placedWith, getNearestHitResult(player, null, true), isFlying, hasLook, yaw, pitch);
+                blockPlace.setCursor(place.getCursorPosition());
+
+                if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11)) {
+                    // ViaRewind is stupid and divides the byte by 15 to get the float
+                    // We must undo this to get the correct block place... why?
+                    if (place.getCursorPosition().getX() * 15 % 1 == 0 && place.getCursorPosition().getY() * 15 % 1 == 0 && place.getCursorPosition().getZ() * 15 % 1 == 0) {
+                        // This is impossible to occur without ViaRewind, fix their stupidity
+                        int trueByteX = (int) (place.getCursorPosition().getX() * 15);
+                        int trueByteY = (int) (place.getCursorPosition().getY() * 15);
+                        int trueByteZ = (int) (place.getCursorPosition().getZ() * 15);
+
+                        blockPlace.setCursor(new Vector3f(trueByteX / 16f, trueByteY / 16f, trueByteZ / 16f));
+                    }
+                }
 
                 // Right-clicking a trapdoor/door/etc.
                 StateType placedAgainst = blockPlace.getPlacedAgainstMaterial();
