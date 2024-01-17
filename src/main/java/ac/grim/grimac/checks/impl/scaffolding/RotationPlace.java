@@ -5,6 +5,8 @@ import ac.grim.grimac.checks.type.BlockPlaceCheck;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.update.BlockPlace;
 import ac.grim.grimac.utils.anticheat.update.PostBlockPlace;
+import ac.grim.grimac.utils.collisions.HitboxData;
+import ac.grim.grimac.utils.collisions.datatypes.CollisionBox;
 import ac.grim.grimac.utils.collisions.datatypes.SimpleCollisionBox;
 import ac.grim.grimac.utils.data.Pair;
 import ac.grim.grimac.utils.nmsutil.Materials;
@@ -47,7 +49,7 @@ public class RotationPlace extends BlockPlaceCheck {
             CollisionBox placedOn = HitboxData.getBlockHitbox(player, place.getMaterial(), player.getClientVersion(), player.compensatedWorld.getWrappedBlockStateAt(clicked), clicked.getX(), clicked.getY(), clicked.getZ());
             if (placedOn instanceof SimpleCollisionBox && placedOn.isFullBlock()) {
                 boolean flag = false;
-                switch (place.getFace()) {
+                switch (place.getDirection()) {
                     case SOUTH:
                         flag = place.getCursor().getZ() != 1f;
                     case NORTH:
