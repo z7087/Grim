@@ -31,7 +31,7 @@ public class RotationPlace extends BlockPlaceCheck {
     boolean ignorePost = false;
 
     // how much 1.11- server threshold safe?
-    double cursorThreshold = PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_11) ? 0.1 : 0.0001;
+    double cursorThreshold = PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_11) ? 0.0626 : 0.0001;
     boolean shouldSkipCheckCursor = PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11);
 
     public RotationPlace(GrimPlayer player) {
@@ -41,6 +41,34 @@ public class RotationPlace extends BlockPlaceCheck {
     @Override
     public void onBlockPlace(final BlockPlace place) {
         if (place.getMaterial() == StateTypes.SCAFFOLDING) return;
+
+        if (!shouldSkipCheckCursor) {
+            Vector3i clicked = place.getPlacedAgainstBlockLocation();
+            CollisionBox placedOn = HitboxData.getBlockHitbox(player, place.getMaterial(), player.getClientVersion(), player.compensatedWorld.getWrappedBlockStateAt(clicked), clicked.getX(), clicked.getY(), clicked.getZ());
+            if (placedOn instanceof SimpleCollisionBox && placedOn.isFullBlock()) {
+                boolean flag = false;
+                switch (place.getFace()) {
+                    case SOUTH:
+                        flag = place.getCursor().getZ() != 1f;
+                    case NORTH:
+                        flag = place.getCursor().getZ() != 0f;
+                    case EAST:
+                        flag = place.getCursor().getX() != 1f;
+                    case WEST:
+                        flag = place.getCursor().getX() != 0f;
+                    case UP:
+                        flag = place.getCursor().getY() != 1f;
+                    case DOWN:
+                        flag = place.getCursor().getY() != 0f;
+                }
+                if (flag) {
+                    flagBuffer = 1;
+                    if (flagAndAlert("pre-flying-impossible-cursor") && shouldModifyPackets() && shouldCancel()) {
+                        place.resync();
+                    }
+                }
+            }
+        }
 
         if (flagBuffer > 0) {
             // check it like the player sent a transaction
