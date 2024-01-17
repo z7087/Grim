@@ -7,13 +7,13 @@ import ac.grim.grimac.utils.anticheat.update.PredictionComplete;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
 
-@CheckData(name = "NegativeTimer", configName = "NegativeTimer", setback = 10)
+@CheckData(name = "NegativeTimer", configName = "NegativeTimer")
 public class NegativeTimerCheck extends TimerCheck implements PostPredictionCheck {
-    int maxPingTransaction = 5;
+    int maxPingTransaction = 5; // if the player has 5s+ ping after a tick, kick him
 
     public NegativeTimerCheck(GrimPlayer player) {
         super(player);
-        timerBalanceRealTime = System.nanoTime() + clockDrift;
+        //timerBalanceRealTime = System.nanoTime() + clockDrift;
     }
 
     @Override
