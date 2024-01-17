@@ -52,14 +52,19 @@ public class RotationPlace extends BlockPlaceCheck {
                 switch (place.getDirection()) {
                     case SOUTH:
                         flag = place.getCursor().getZ() != 1f;
+                        break;
                     case NORTH:
                         flag = place.getCursor().getZ() != 0f;
+                        break;
                     case EAST:
                         flag = place.getCursor().getX() != 1f;
+                        break;
                     case WEST:
                         flag = place.getCursor().getX() != 0f;
+                        break;
                     case UP:
                         flag = place.getCursor().getY() != 1f;
+                        break;
                     case DOWN:
                         flag = place.getCursor().getY() != 0f;
                 }
