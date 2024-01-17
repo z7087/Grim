@@ -10,53 +10,66 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.player.GameMode;
 
 enum Status {
-    outTick, beforeTick, afterTick;
+    outTick, inTick;
 }
 
-@CheckData(name = "BadPacketsR", decay = 0.1)
+@CheckData(name = "BadPacketsR")
 public class BadPacketsR extends Check implements PacketCheck {
-    public BadPacketsR(final GrimPlayer player) {
+    public BadPacketsR(GrimPlayer player) {
         super(player);
     }
 
-    private boolean hadClientRunTick = false;
-    private long lastTransTime = -1;
-    private Status clientStatus = Status.outTick;
-    private int oldTransId = 0;
+    private long lastTransReceivedTime = -1;
+    private long lastTransSentTime = -1;
+    private int skippedTicks = 0;
 
+    // let's hope clients won't gc in process packets
     @Override
-    public void onPacketReceive(final PacketReceiveEvent event) {
+    public void onPacketReceive(PacketReceiveEvent event) {
+        if (player.compensatedEntities.getSelf().isDead || player.gamemode == GameMode.SPECTATOR) {
+            lastTransReceivedTime = -1;
+            lastTransSentTime = -1;
+            skippedTicks = 0;
+            return;
+        }
         if (isTransaction(event.getPacketType()) && player.packetStateData.lastTransactionPacketWasValid) {
+            if (lastTransReceivedTime == -1 || lastTransSentTime == -1) {
+                lastTransReceivedTime = player.getPlayerClockAtLeast();
+                lastTransSentTime = System.nanoTime();
+                skippedTicks = 0;
+            }
+            // player didn't send any flying but send a valid transaction after last check
+            // and this transaction is after last transaction that we save 50ms
+            // the player must after some gameloops and skipped all ticks that ran in these gameloops
+            else if (player.getPlayerClockAtLeast() - lastTransSentTime >= 55e6) {
+                lastTransReceivedTime = player.getPlayerClockAtLeast();
+                lastTransSentTime = System.nanoTime();
+                skippedTicks++;
+            }
             // client ran some ticks and send a transaction
-            if (clientStatus != Status.outTick) {
-                lastTransTime = System.currentTimeMillis();
-                oldTransId = player.lastTransactionSent.get();
-                shouldCheckNextTick = true;
-                hadClientRunTick = false;
+            else if (clientStatus != Status.outTick) {
+                lastTransReceivedTime = player.getPlayerClockAtLeast();
+                lastTransSentTime = System.nanoTime();
+                skippedTicks++;
+            }
+            if (skippedTicks > 20) {
+                flagAndAlert(""+skippedTicks);
+                player.compensatedWorld.removeInvalidPistonLikeStuff(0);
             }
             clientStatus = Status.outTick;
         } else if (player.checkManager.getPostPredictionCheck(PostCheck.class).shouldCountPacketForPost(event.getPacketType())) {
-            if (shouldCheckNextTick) {
-                long diff = (System.currentTimeMillis() - lastTransTime);
-                if (diff > 1000) {
-                    //TODO: figure out why spectators are flagging this
-                    if (lastTransTime != -1 && hadClientRunTick && player.gamemode != GameMode.SPECTATOR) {
-                        flagAndAlert("lst=" + diff + "ms");
-                    } else {
-                        reward();
-                    }
-                    player.compensatedWorld.removeInvalidPistonLikeStuff(oldTransId);
-                }
-            }
-            hadClientRunTick = true;
-            clientStatus = Status.beforeTick;
+            clientStatus = Status.inTick;
         } else if ((event.getPacketType() == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION ||
                 event.getPacketType() == PacketType.Play.Client.PLAYER_POSITION) && !player.compensatedEntities.getSelf().inVehicle()) {
-            hadClientRunTick = true;
-            clientStatus = Status.afterTick;
+            lastTransReceivedTime = -1;
+            lastTransSentTime = -1;
+            skippedTicks = 0;
+            clientStatus = Status.inTick;
         } else if (event.getPacketType() == PacketType.Play.Client.STEER_VEHICLE && player.compensatedEntities.getSelf().inVehicle()) {
-            hadClientRunTick = true;
-            clientStatus = Status.afterTick;
+            lastTransReceivedTime = -1;
+            lastTransSentTime = -1;
+            skippedTicks = 0;
+            clientStatus = Status.inTick;
         }
     }
 
