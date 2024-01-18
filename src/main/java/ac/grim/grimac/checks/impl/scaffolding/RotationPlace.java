@@ -16,6 +16,7 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.protocol.world.BlockFace;
+import com.github.retrooper.packetevents.protocol.world.states.type.StateType;
 import com.github.retrooper.packetevents.protocol.world.states.type.StateTypes;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.util.Vector3f;
@@ -46,8 +47,14 @@ public class RotationPlace extends BlockPlaceCheck {
 
         if (!shouldSkipCheckCursor) {
             Vector3i clicked = place.getPlacedAgainstBlockLocation();
+
+            // use this until grim fix block boxes
+            StateType type = player.compensatedWorld.getWrappedBlockStateAt(clicked).getType();
+            boolean ableCheckFullBlock = type.isBlocking() && type.isSolid() && !type.exceedsCube();
+
             CollisionBox placedOn = HitboxData.getBlockHitbox(player, place.getMaterial(), player.getClientVersion(), player.compensatedWorld.getWrappedBlockStateAt(clicked), clicked.getX(), clicked.getY(), clicked.getZ());
-            if (placedOn.getClass() == SimpleCollisionBox.class && placedOn.isFullBlock()) {
+
+            if (ableCheckFullBlock && placedOn instanceof SimpleCollisionBox && placedOn.isFullBlock()) {
                 boolean flag = false;
                 switch (place.getDirection()) {
                     case SOUTH:
