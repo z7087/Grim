@@ -47,7 +47,7 @@ public class RotationPlace extends BlockPlaceCheck {
         if (!shouldSkipCheckCursor) {
             Vector3i clicked = place.getPlacedAgainstBlockLocation();
             CollisionBox placedOn = HitboxData.getBlockHitbox(player, place.getMaterial(), player.getClientVersion(), player.compensatedWorld.getWrappedBlockStateAt(clicked), clicked.getX(), clicked.getY(), clicked.getZ());
-            if (placedOn instanceof SimpleCollisionBox && placedOn.isFullBlock()) {
+            if (placedOn.getClass() == SimpleCollisionBox.class && placedOn.isFullBlock()) {
                 boolean flag = false;
                 switch (place.getDirection()) {
                     case SOUTH:
