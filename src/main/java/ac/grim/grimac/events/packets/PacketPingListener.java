@@ -32,14 +32,15 @@ public class PacketPingListener extends PacketListenerAbstract {
             if (player == null) return;
             player.packetStateData.lastTransactionPacketWasValid = false;
 
+            // check if accepted
+            if (!transaction.isAccepted()) {
+                player.checkManager.getPacketCheck(BadPacketsS.class).flag();
+                event.setCancelled(true);
+                return;
+            }
+
             // Vanilla always uses an ID starting from 1
-            if (id <= 0) {
-                // check if accepted
-                if (!transaction.isAccepted()) {
-                    player.checkManager.getPacketCheck(BadPacketsS.class).flag();
-                    event.setCancelled(true);
-                    return;
-                }
+            if (transaction.getWindowId() == 0 && id <= 0) {
                 // Check if we sent this packet before cancelling it
                 if (player.addTransactionResponse(id)) {
                     player.packetStateData.lastTransactionPacketWasValid = true;
@@ -57,7 +58,7 @@ public class PacketPingListener extends PacketListenerAbstract {
             int id = pong.getId();
             // If it wasn't below 0, it wasn't us
             // If it wasn't in short range, it wasn't us either
-            if (id == (short) id) {
+            if (id <= 0 && id == (short) id) {
                 short shortID = ((short) id);
                 if (player.addTransactionResponse(shortID)) {
                     player.packetStateData.lastTransactionPacketWasValid = true;
@@ -75,7 +76,7 @@ public class PacketPingListener extends PacketListenerAbstract {
             short id = confirmation.getActionId();
 
             // Vanilla always uses an ID starting from 1
-            if (id <= 0) {
+            if (confirmation.getWindowId() == 0 && !confirmation.isAccepted() && id <= 0) {
                 GrimPlayer player = GrimAPI.INSTANCE.getPlayerDataManager().getPlayer(event.getUser());
                 if (player == null) return;
 
@@ -91,7 +92,7 @@ public class PacketPingListener extends PacketListenerAbstract {
 
             int id = pong.getId();
             // Check if in the short range, we only use short range
-            if (id == (short) id) {
+            if (id <= 0 && id == (short) id) {
                 GrimPlayer player = GrimAPI.INSTANCE.getPlayerDataManager().getPlayer(event.getUser());
                 if (player == null) return;
                 // Cast ID twice so we can use the list
