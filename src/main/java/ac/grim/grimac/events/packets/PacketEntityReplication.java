@@ -81,7 +81,6 @@ public class PacketEntityReplication extends Check implements PacketCheck {
             int id = ping.getId();
             short shortId = (short) id; // idk if i need this
             if (id <= 0 && id == shortId) {
-                Pair<Short, Long> data = null;
                 boolean hasID = false;
                 for (Pair<Short, Long> iterator : player.transactionsSent) {
                     if (iterator.getFirst() == shortId) {
@@ -97,7 +96,6 @@ public class PacketEntityReplication extends Check implements PacketCheck {
             WrapperPlayServerWindowConfirmation transaction = new WrapperPlayServerWindowConfirmation(event);
             short id = transaction.getActionId();
             if (transaction.getWindowId() == 0 && !transaction.isAccepted() && id <= 0) {
-                Pair<Short, Long> data = null;
                 boolean hasID = false;
                 for (Pair<Short, Long> iterator : player.transactionsSent) {
                     if (iterator.getFirst() == id) {
