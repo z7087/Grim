@@ -75,9 +75,41 @@ public class PacketEntityReplication extends Check implements PacketCheck {
 
     @Override
     public void onPacketSend(PacketSendEvent event) {
-        if (event.getPacketType() == PacketType.Play.Server.PING || event.getPacketType() == PacketType.Play.Server.WINDOW_CONFIRMATION) {
-            despawnedEntitiesThisTransaction.clear();
+        if (event.getPacketType() == PacketType.Play.Server.PING) { // check if the confirmation maybe sent by us
+            WrapperPlayServerPing ping = new WrapperPlayServerPing(event);
+            int id = ping.getId();
+            short shortId = (short) id; // idk if i need this
+            if (id <= 0 && id == shortId) {
+                Pair<Short, Long> data = null;
+                boolean hasID = false;
+                for (Pair<Short, Long> iterator : player.transactionsSent) {
+                    if (iterator.getFirst() == shortId) {
+                        hasID = true;
+                        break;
+                    }
+                }
+                if (hasID) {
+                    despawnedEntitiesThisTransaction.clear();
+                }
+            }
+        } else if (event.getPacketType() == PacketType.Play.Server.WINDOW_CONFIRMATION) {
+            WrapperPlayServerWindowConfirmation confirmation = new WrapperPlayServerWindowConfirmation(event);
+            short id = confirmation.getActionId();
+            if (confirmation.getWindowId() == 0 && !confirmation.isAccepted() && id <= 0) {
+                Pair<Short, Long> data = null;
+                boolean hasID = false;
+                for (Pair<Short, Long> iterator : player.transactionsSent) {
+                    if (iterator.getFirst() == id) {
+                        hasID = true;
+                        break;
+                    }
+                }
+                if (hasID) {
+                    despawnedEntitiesThisTransaction.clear();
+                }
+            }
         }
+
         if (event.getPacketType() == PacketType.Play.Server.SPAWN_LIVING_ENTITY) {
             WrapperPlayServerSpawnLivingEntity packetOutEntity = new WrapperPlayServerSpawnLivingEntity(event);
             addEntity(packetOutEntity.getEntityId(), packetOutEntity.getEntityType(), packetOutEntity.getPosition(), packetOutEntity.getYaw(), packetOutEntity.getPitch(), packetOutEntity.getEntityMetadata(), 0);
