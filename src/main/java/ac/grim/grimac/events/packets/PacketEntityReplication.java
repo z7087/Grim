@@ -94,9 +94,9 @@ public class PacketEntityReplication extends Check implements PacketCheck {
                 }
             }
         } else if (event.getPacketType() == PacketType.Play.Server.WINDOW_CONFIRMATION) {
-            WrapperPlayServerWindowConfirmation confirmation = new WrapperPlayServerWindowConfirmation(event);
-            short id = confirmation.getActionId();
-            if (confirmation.getWindowId() == 0 && !confirmation.isAccepted() && id <= 0) {
+            WrapperPlayServerWindowConfirmation transaction = new WrapperPlayServerWindowConfirmation(event);
+            short id = transaction.getActionId();
+            if (transaction.getWindowId() == 0 && !transaction.isAccepted() && id <= 0) {
                 Pair<Short, Long> data = null;
                 boolean hasID = false;
                 for (Pair<Short, Long> iterator : player.transactionsSent) {
