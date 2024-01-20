@@ -76,36 +76,9 @@ public class PacketEntityReplication extends Check implements PacketCheck {
 
     @Override
     public void onPacketSend(PacketSendEvent event) {
-        if (event.getPacketType() == PacketType.Play.Server.PING) { // check if the confirmation maybe sent by us
-            WrapperPlayServerPing ping = new WrapperPlayServerPing(event);
-            int id = ping.getId();
-            short shortId = (short) id; // idk if i need this
-            if (id <= 0 && id == shortId) {
-                boolean hasID = false;
-                for (Pair<Short, Long> iterator : player.transactionsSent) {
-                    if (iterator.getFirst() == shortId) {
-                        hasID = true;
-                        break;
-                    }
-                }
-                if (hasID) {
-                    despawnedEntitiesThisTransaction.clear();
-                }
-            }
-        } else if (event.getPacketType() == PacketType.Play.Server.WINDOW_CONFIRMATION) {
-            WrapperPlayServerWindowConfirmation transaction = new WrapperPlayServerWindowConfirmation(event);
-            short id = transaction.getActionId();
-            if (transaction.getWindowId() == 0 && !transaction.isAccepted() && id <= 0) {
-                boolean hasID = false;
-                for (Pair<Short, Long> iterator : player.transactionsSent) {
-                    if (iterator.getFirst() == id) {
-                        hasID = true;
-                        break;
-                    }
-                }
-                if (hasID) {
-                    despawnedEntitiesThisTransaction.clear();
-                }
+        if (event.getPacketType() == PacketType.Play.Server.PING || event.getPacketType() == PacketType.Play.Server.WINDOW_CONFIRMATION) {
+            if (player.packetStateData.lastSendTransactionPacketWasValid) {
+                despawnedEntitiesThisTransaction.clear();
             }
         }
 
