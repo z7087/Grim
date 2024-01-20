@@ -65,7 +65,6 @@ public class ForceStopUseItem {
             default:
                 return getMethodWithoutException(SpigotReflectionUtil.getServerClass("world.entity.EntityLiving", "EntityLiving"), "clearActiveItem");
         }
-        return false;
     }
 
     // This should runs on netty thread
