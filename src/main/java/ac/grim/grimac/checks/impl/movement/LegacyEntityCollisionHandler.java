@@ -48,22 +48,23 @@ public class LegacyEntityCollisionHandler extends Check implements PacketCheck, 
                     });
                 }
             }
+
             if (event.getPacketType() == PacketType.Play.Server.TEAMS) {
-                WrapperPlayServerTeams teams = new WrapperPlayServerTeams(event);
                 if (ViaVersionUtil.isAvailable() && Via.getConfig().isAutoTeam() && Via.getConfig().isPreventCollision()) {
-                    boolean enablePushable = teams.getTeamMode() != WrapperPlayServerTeams.TeamMode.UPDATE;
-                    player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get(), () -> {
-                        if (enablePushable)
+                    WrapperPlayServerTeams teams = new WrapperPlayServerTeams(event);
+                    if (teams.getTeamMode() != WrapperPlayServerTeams.TeamMode.UPDATE) {
+                        player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get(), () -> {
                             pushable = true;
-                        disablePushableNextTick = false;
-                    });
-                    player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get() + 1, () -> {
-                        if (enablePushable)
+                            disablePushableNextTick = false;
+                        });
+                        player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get() + 1, () -> {
                             pushable = true;
-                        disablePushableNextTick = true;
-                    });
+                            disablePushableNextTick = true;
+                        });
+                    }
                 }
             }
+
         }
     }
     
