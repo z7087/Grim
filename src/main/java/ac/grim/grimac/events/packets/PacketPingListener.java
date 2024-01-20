@@ -80,7 +80,10 @@ public class PacketPingListener extends PacketListenerAbstract {
                 GrimPlayer player = GrimAPI.INSTANCE.getPlayerDataManager().getPlayer(event.getUser());
                 if (player == null) return;
 
+                player.packetStateData.lastSendTransactionPacketWasValid = false;
+
                 if (player.didWeSendThatTrans.remove((Short) id)) {
+                    player.packetStateData.lastSendTransactionPacketWasValid = true;
                     player.transactionsSent.add(new Pair<>(id, System.nanoTime()));
                     player.lastTransactionSent.getAndIncrement();
                 }
@@ -95,9 +98,13 @@ public class PacketPingListener extends PacketListenerAbstract {
             if (id <= 0 && id == (short) id) {
                 GrimPlayer player = GrimAPI.INSTANCE.getPlayerDataManager().getPlayer(event.getUser());
                 if (player == null) return;
+
+                player.packetStateData.lastSendTransactionPacketWasValid = false;
+
                 // Cast ID twice so we can use the list
                 Short shortID = ((short) id);
                 if (player.didWeSendThatTrans.remove(shortID)) {
+                    player.packetStateData.lastSendTransactionPacketWasValid = true;
                     player.transactionsSent.add(new Pair<>(shortID, System.nanoTime()));
                     player.lastTransactionSent.getAndIncrement();
                 }
