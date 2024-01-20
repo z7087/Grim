@@ -10,6 +10,7 @@ public class PacketStateData {
     public boolean lastPacketWasTeleport = false;
     public boolean lastPacketWasOnePointSeventeenDuplicate = false;
     public boolean lastTransactionPacketWasValid = false;
+    public boolean lastSendTransactionPacketWasValid = false;
     public int lastSlotSelected;
     public InteractionHand eatingHand = InteractionHand.MAIN_HAND;
     public long lastRiptide = 0;
