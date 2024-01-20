@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import java.lang.reflect.Method;
 
 public class ForceStopUseItem {
-    public static Method<?> clearActiveHandNMS = null;
+    public static Method clearActiveHandNMS = null;
 
     public static boolean initMethod() {
         switch (PacketEvents.getAPI().getServerManager().getVersion()) {
