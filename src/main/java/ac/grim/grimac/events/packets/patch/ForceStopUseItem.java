@@ -9,6 +9,8 @@ import io.github.retrooper.packetevents.util.FoliaCompatUtil;
 import io.github.retrooper.packetevents.util.SpigotReflectionUtil;
 import org.bukkit.entity.Player;
 
+import java.lang.reflect.Method;
+
 public class ForceStopUseItem {
     public static Method<?> clearActiveHandNMS = null;
 
