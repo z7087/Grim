@@ -70,7 +70,7 @@ public class ForceStopUseItem {
 
     // This should runs on netty thread
     public static boolean handleSlowStateChange(GrimPlayer player) {
-        if (clearActiveHand == null) {
+        if (clearActiveHandNMS == null) {
             if (!initMethod()) return false;
         }
         Player bukkitPlayer = player.bukkitPlayer;
