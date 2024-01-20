@@ -38,6 +38,7 @@ public class LegacyEntityCollisionHandler extends Check implements PacketCheck, 
         if (PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_9)) {
             if (event.getPacketType() == PacketType.Play.Server.JOIN_GAME) {
                 if (ViaVersionUtil.isAvailable() && Via.getConfig().isAutoTeam() && Via.getConfig().isPreventCollision()) {
+                    player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get(), () -> pushable = true);
                     player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get() + 1, () -> {
                         pushable = true;
                         disablePushableNextTick = true;
@@ -48,6 +49,8 @@ public class LegacyEntityCollisionHandler extends Check implements PacketCheck, 
                 WrapperPlayServerTeams teams = new WrapperPlayServerTeams(event);
                 if (ViaVersionUtil.isAvailable() && Via.getConfig().isAutoTeam() && Via.getConfig().isPreventCollision()) {
                     boolean enablePushable = teams.getTeamMode() != WrapperPlayServerTeams.TeamMode.UPDATE;
+                    if (enablePushable)
+                        player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get(), () -> pushable = true);
                     player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get() + 1, () -> {
                         if (enablePushable)
                             pushable = true;
