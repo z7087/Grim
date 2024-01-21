@@ -156,9 +156,14 @@ public class PacketPlayerDigging extends PacketListenerAbstract {
             CheckManagerListener.handleQueuedPlaces(player, false, 0, 0, System.currentTimeMillis());
 
             if (player.packetStateData.lastSlotSelected != slot.getSlot()) {
+                // remove the /**/ until other noslow bypasses patched
+                /*
                 if (player.packetStateData.slowedByUsingItem) {
+                */
                     ForceStopUseItem.handleSlowStateChange(player);
+                /*
                 }
+                */
                 player.packetStateData.slowedByUsingItem = false;
                 // Sequence is ignored by the server
                 player.checkManager.getPostPredictionCheck(NoSlowA.class).didSlotChangeLastTick = true;
