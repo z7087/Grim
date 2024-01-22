@@ -75,6 +75,11 @@ public class BadPacketsU extends Check implements PacketCheck {
                     }
                     if (flying.getLocation().getYaw() != lastNonStupidityLook.getX() || flying.getLocation().getPitch() != lastNonStupidityLook.getY()) {
                         lastStupidityLook = new Vector3f(flying.getLocation().getYaw(), flying.getLocation().getPitch(), 0f);
+                    } else {
+                        // player sends a duplicate stupidity, deny it?
+                        if (shouldModifyPackets()) {
+                            event.setCancelled(true);
+                        }
                     }
                 }
             }
