@@ -68,7 +68,8 @@ public class ForceStopUseItem {
     }
 
     // This should runs on netty thread
-    public static boolean handleSlowStateChange(GrimPlayer player) {
+    // I think should fix this or we can't patch other noslow
+    public static boolean handleSlowStateChangeNetty(GrimPlayer player) {
         if (clearActiveHandNMS == null) {
             if (!initMethod()) return false;
         }
@@ -84,6 +85,26 @@ public class ForceStopUseItem {
             return true;
         }
         return false;
+    }
+
+    // This should runs on bukkit event thread
+    public static boolean handleSlowStateChangeBukkit(Player bukkitPlayer) {
+        if (clearActiveHandNMS == null) {
+            if (!initMethod()) return false;
+        }
+        if (bukkitPlayer != null) {
+            try {
+                clearActiveHandNMS.invoke(SpigotReflectionUtil.getEntityPlayer(bukkitPlayer));
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public static boolean needSwitchItemPatch() {
+        return PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V1_16);
     }
 
     private static boolean getLegacyMethod(String className, String methodName) {
