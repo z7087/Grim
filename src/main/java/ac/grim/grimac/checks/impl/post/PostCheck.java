@@ -50,10 +50,7 @@ public class PostCheck extends Check implements PacketCheck, PostPredictionCheck
 
             flags.clear();
         }
-        // Don't count teleports or duplicates as movements
-        if (!player.packetStateData.lastPacketWasTeleport && !player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
-            post.clear();
-        }
+        post.clear();
     }
 
     @Override
@@ -71,6 +68,13 @@ public class PostCheck extends Check implements PacketCheck, PostPredictionCheck
 
     @Override
     public void onPacketReceive(final PacketReceiveEvent event) {
+        if (WrapperPlayClientPlayerFlying.isFlying(event.getPacketType())) {
+            // Don't count teleports or duplicates as movements
+            if (!player.packetStateData.lastPacketWasTeleport && !player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+                post.clear();
+            }
+            return;
+        }
         // 1.13+ clients can click inventory outside tick loop, so we can't post check those two packets on 1.13+
         PacketTypeCommon packetType = event.getPacketType();
         if (isTransaction(packetType) && player.packetStateData.lastTransactionPacketWasValid) {
