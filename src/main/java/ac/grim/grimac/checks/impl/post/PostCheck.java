@@ -26,7 +26,7 @@ import static com.github.retrooper.packetevents.protocol.packettype.PacketType.P
 
 @CheckData(name = "Post")
 public class PostCheck extends Check implements PacketCheck, PostPredictionCheck {
-    private final List<String> post = new EvictingQueue<>(10);
+    private final List<PacketTypeCommon> post = new EvictingQueue<>(10);
     // Due to 1.9+ missing the idle packet, we must queue flags
     // 1.8 clients will have the same logic for simplicity, although it's not needed
     private final List<String> flags = new EvictingQueue<>(10);
@@ -75,8 +75,8 @@ public class PostCheck extends Check implements PacketCheck, PostPredictionCheck
         PacketTypeCommon packetType = event.getPacketType();
         if (isTransaction(packetType) && player.packetStateData.lastTransactionPacketWasValid) {
             if (!post.isEmpty()) {
-                for (PacketTypeCommon packetType : post) {
-                    flags.add(packetType.toString().toLowerCase(Locale.ROOT).replace("_", " ") + " v" + player.getClientVersion().getReleaseName());
+                for (PacketTypeCommon postPacketType : post) {
+                    flags.add(postPacketType.toString().toLowerCase(Locale.ROOT).replace("_", " ") + " v" + player.getClientVersion().getReleaseName());
                 }
             }
             post.clear();
