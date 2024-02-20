@@ -54,16 +54,11 @@ public class BadPacketsD extends Check implements PacketCheck {
                     flagAndAlert();
                     if (player.packetStateData.lastPacketWasTeleport || player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
                         player.getSetbackTeleportUtil().executeNonSimulatingSetback();
-                        packet.getLocation().setPitch(packet.getLocation().getPitch() > 90 ? 90 : -90);
-                        if (player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
-                            // :(
-                            player.yRot = packet.getLocation().getPitch();
-                        }
                     } else {
                         player.getSetbackTeleportUtil().executeViolationSetback();
-                        event.setCancelled(true);
-                        player.onPacketCancel();
                     }
+                    event.setCancelled(true);
+                    player.onPacketCancel();
                 }
             } else {
                 exemptVec = null;
