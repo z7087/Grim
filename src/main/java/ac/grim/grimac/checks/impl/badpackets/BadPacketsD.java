@@ -72,10 +72,16 @@ public class BadPacketsD extends Check implements PacketCheck {
                 exemptVec = null;
             }
 
-            if (mod360 && player.packetStateData.lastPacketWasTeleport) {
-                if (packet.getLocation().getYaw() >= 360 || packet.getLocation().getYaw() <= -360 || packet.getLocation().getPitch() >= 360 || packet.getLocation().getPitch() <= -360) {
+            if (mod360) {
+                if (packet.getLocation().getPitch() >= 360 || packet.getLocation().getPitch() <= -360) {
                     flag = true;
                 }
+                /*
+                // move it elsewhere?
+                else if (player.packetStateData.lastPacketWasTeleport && (packet.getLocation().getYaw() >= 360 || packet.getLocation().getYaw() <= -360)) {
+                    flag = true;
+                }
+                */
             }
 
             if (flag) {
