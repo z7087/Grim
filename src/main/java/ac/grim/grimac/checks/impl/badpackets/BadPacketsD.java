@@ -15,6 +15,9 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPl
 
 @CheckData(name = "BadPacketsD")
 public class BadPacketsD extends Check implements PacketCheck {
+    // 1.19.3+: https://bugs.mojang.com/browse/MC-259376
+    // 1.8.8-: https://bugs.mojang.com/browse/MC-45104
+    // mojang fixed this and removed the fix after 8 years?
     final boolean wtf = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3) || player.getClientVersion().isOlderThan(ClientVersion.V_1_9);
     boolean d = false;
     Vector3f exemptVec;
