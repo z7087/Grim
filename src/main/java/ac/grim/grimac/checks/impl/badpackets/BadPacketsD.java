@@ -52,9 +52,13 @@ public class BadPacketsD extends Check implements PacketCheck {
                 if (exemptVec == null || exemptVec.getX() != packet.getLocation().getYaw() || exemptVec.getY() != packet.getLocation().getPitch()) {
                     exemptVec = null;
                     flagAndAlert();
-                    player.getSetbackTeleportUtil().executeViolationSetback();
-                    event.setCancelled(true);
-                    player.onPacketCancel();
+                    if (!player.packetStateData.lastPacketWasTeleport && !player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+                        player.getSetbackTeleportUtil().executeViolationSetback();
+                        event.setCancelled(true);
+                        player.onPacketCancel();
+                    } else {
+                        packet.getLocation().setPitch(packet.getLocation().getPitch() > 90 ? 90 : -90);
+                    }
                 }
             } else {
                 exemptVec = null;
