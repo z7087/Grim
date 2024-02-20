@@ -20,7 +20,7 @@ public class BadPacketsD extends Check implements PacketCheck {
     // 1.8.8-: https://bugs.mojang.com/browse/MC-45104
     // mojang fixed this and removed the fix after 8 years?
     private final boolean wtf = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3) || player.getClientVersion().isOlderThan(ClientVersion.V_1_9);
-    private final boolean mod360 = player.getClientVersion().isOlderThan(ClientVersion.V_1_9);
+    private final boolean mod360 = player.getClientVersion().isOlderThan(ClientVersion.V_1_19_3);
     private boolean d = false;
     private Vector3f exemptVec;
 
@@ -59,27 +59,36 @@ public class BadPacketsD extends Check implements PacketCheck {
         // maybe should do something
         if (event.getPacketType() == PacketType.Play.Client.PLAYER_ROTATION || event.getPacketType() == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION) {
             WrapperPlayClientPlayerFlying packet = new WrapperPlayClientPlayerFlying(event);
+            boolean flag = false;
             if (packet.getLocation().getPitch() > 90 || packet.getLocation().getPitch() < -90) {
-                if (wtf && player.packetStateData.lastPacketWasTeleport && d) {
-                    if (mod360 && (packet.getLocation().getPitch() >= 360 || packet.getLocation().getPitch() <= -360))
-                        exemptVec = null;
-                    else
-                        exemptVec = new Vector3f(packet.getLocation().getYaw(), packet.getLocation().getPitch(), 0);
-                }
+                if (wtf && player.packetStateData.lastPacketWasTeleport && d)
+                    exemptVec = new Vector3f(packet.getLocation().getYaw(), packet.getLocation().getPitch(), 0);
+
                 if (exemptVec == null || exemptVec.getX() != packet.getLocation().getYaw() || exemptVec.getY() != packet.getLocation().getPitch()) {
                     exemptVec = null;
-                    flagAndAlert();
-                    if (player.packetStateData.lastPacketWasTeleport || player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
-                        player.getSetbackTeleportUtil().executeNonSimulatingSetback();
-                    } else {
-                        player.getSetbackTeleportUtil().executeViolationSetback();
-                    }
-                    event.setCancelled(true);
-                    player.onPacketCancel();
+                    flag = true;
                 }
             } else {
                 exemptVec = null;
             }
+
+            if (mod360) {
+                if (packet.getLocation().getYaw() >= 360 || packet.getLocation().getYaw() <= -360 || packet.getLocation().getPitch() >= 360 || packet.getLocation().getPitch() <= -360) {
+                    flag = true;
+                }
+            }
+
+            if (flag) {
+                flagAndAlert();
+                if (player.packetStateData.lastPacketWasTeleport || player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
+                    player.getSetbackTeleportUtil().executeNonSimulatingSetback();
+                } else {
+                    player.getSetbackTeleportUtil().executeViolationSetback();
+                }
+                event.setCancelled(true);
+                player.onPacketCancel();
+            }
+
         }
     }
 }
