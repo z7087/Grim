@@ -15,12 +15,13 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPl
 
 @CheckData(name = "BadPacketsD")
 public class BadPacketsD extends Check implements PacketCheck {
+    public static final boolean hackfix = false;
     // 1.19.3+: https://bugs.mojang.com/browse/MC-259376
     // 1.8.8-: https://bugs.mojang.com/browse/MC-45104
     // mojang fixed this and removed the fix after 8 years?
-    final boolean wtf = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3) || player.getClientVersion().isOlderThan(ClientVersion.V_1_9);
-    boolean d = false;
-    Vector3f exemptVec;
+    private final boolean wtf = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3) || player.getClientVersion().isOlderThan(ClientVersion.V_1_9);
+    private boolean d = false;
+    private Vector3f exemptVec;
 
     public BadPacketsD(GrimPlayer player) {
         super(player);
@@ -31,11 +32,19 @@ public class BadPacketsD extends Check implements PacketCheck {
         if (event.getPacketType() == PacketType.Play.Server.PLAYER_POSITION_AND_LOOK && wtf) {
             WrapperPlayServerPlayerPositionAndLook teleport = new WrapperPlayServerPlayerPositionAndLook(event);
             if (teleport.isRelativeFlag(RelativeFlag.PITCH)) {
-                if (teleport.getPitch() != 0)
-                    d = true;
+                if (teleport.getPitch() != 0) {
+                    if (hackfix)
+                        teleport.setPitch(0f);
+                    else
+                        d = true;
+                }
             } else {
-                if (teleport.getPitch() > 90 || teleport.getPitch() < -90)
-                    d = true;
+                if (teleport.getPitch() > 90 || teleport.getPitch() < -90) {
+                    if (hackfix)
+                        teleport.setPitch(teleport.getPitch() > 90 ? 90f : -90f);
+                    else
+                        d = true;
+                }
             }
         }
     }
