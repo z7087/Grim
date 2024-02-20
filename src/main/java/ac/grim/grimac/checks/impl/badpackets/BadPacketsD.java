@@ -24,7 +24,7 @@ public class BadPacketsD extends Check implements PacketCheck {
 
     @Override
     public void onPacketSend(PacketSendEvent event) {
-        if (event.getPacketType(PacketType.Play.Server.PLAYER_POSITION_AND_LOOK) && player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3)) {
+        if (event.getPacketType() == PacketType.Play.Server.PLAYER_POSITION_AND_LOOK && player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3)) {
             WrapperPlayServerPlayerPositionAndLook teleport = new WrapperPlayServerPlayerPositionAndLook(event);
             if (teleport.isRelativeFlag(RelativeFlag.PITCH)) {
                 if (teleport.getPitch() != 0)
