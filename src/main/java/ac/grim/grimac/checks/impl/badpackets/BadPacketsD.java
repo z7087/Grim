@@ -15,6 +15,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPl
 
 @CheckData(name = "BadPacketsD")
 public class BadPacketsD extends Check implements PacketCheck {
+    final boolean wtf = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3) || player.getClientVersion().isOlderThan(ClientVersion.V_1_9);
     boolean d = false;
     Vector3f exemptVec;
 
@@ -24,7 +25,7 @@ public class BadPacketsD extends Check implements PacketCheck {
 
     @Override
     public void onPacketSend(PacketSendEvent event) {
-        if (event.getPacketType() == PacketType.Play.Server.PLAYER_POSITION_AND_LOOK && player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3)) {
+        if (event.getPacketType() == PacketType.Play.Server.PLAYER_POSITION_AND_LOOK && wtf) {
             WrapperPlayServerPlayerPositionAndLook teleport = new WrapperPlayServerPlayerPositionAndLook(event);
             if (teleport.isRelativeFlag(RelativeFlag.PITCH)) {
                 if (teleport.getPitch() != 0)
@@ -46,7 +47,7 @@ public class BadPacketsD extends Check implements PacketCheck {
         if (event.getPacketType() == PacketType.Play.Client.PLAYER_ROTATION || event.getPacketType() == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION) {
             WrapperPlayClientPlayerFlying packet = new WrapperPlayClientPlayerFlying(event);
             if (packet.getLocation().getPitch() > 90 || packet.getLocation().getPitch() < -90) {
-                if (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3) && player.packetStateData.lastPacketWasTeleport && d) {
+                if (wtf && player.packetStateData.lastPacketWasTeleport && d) {
                     exemptVec = new Vector3f(packet.getLocation().getYaw(), packet.getLocation().getPitch(), 0);
                 }
                 if (exemptVec == null || exemptVec.getX() != packet.getLocation().getYaw() || exemptVec.getY() != packet.getLocation().getPitch()) {
