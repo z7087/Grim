@@ -20,6 +20,7 @@ public class BadPacketsD extends Check implements PacketCheck {
     // 1.8.8-: https://bugs.mojang.com/browse/MC-45104
     // mojang fixed this and removed the fix after 8 years?
     private final boolean wtf = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_19_3) || player.getClientVersion().isOlderThan(ClientVersion.V_1_9);
+    private final boolean mod360 = player.getClientVersion().isOlderThan(ClientVersion.V_1_9);
     private boolean d = false;
     private Vector3f exemptVec;
 
@@ -60,7 +61,10 @@ public class BadPacketsD extends Check implements PacketCheck {
             WrapperPlayClientPlayerFlying packet = new WrapperPlayClientPlayerFlying(event);
             if (packet.getLocation().getPitch() > 90 || packet.getLocation().getPitch() < -90) {
                 if (wtf && player.packetStateData.lastPacketWasTeleport && d) {
-                    exemptVec = new Vector3f(packet.getLocation().getYaw(), packet.getLocation().getPitch(), 0);
+                    if (mod360 && (packet.getLocation().getPitch() >= 360 || packet.getLocation().getPitch() <= -360))
+                        exemptVec = null;
+                    else
+                        exemptVec = new Vector3f(packet.getLocation().getYaw(), packet.getLocation().getPitch(), 0);
                 }
                 if (exemptVec == null || exemptVec.getX() != packet.getLocation().getYaw() || exemptVec.getY() != packet.getLocation().getPitch()) {
                     exemptVec = null;
