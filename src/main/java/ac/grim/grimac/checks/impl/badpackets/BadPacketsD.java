@@ -65,7 +65,6 @@ public class BadPacketsD extends Check implements PacketCheck {
                     exemptVec = new Vector3f(packet.getLocation().getYaw(), packet.getLocation().getPitch(), 0);
 
                 if (exemptVec == null || exemptVec.getX() != packet.getLocation().getYaw() || exemptVec.getY() != packet.getLocation().getPitch()) {
-                    exemptVec = null;
                     flag = true;
                 }
             } else {
@@ -85,6 +84,7 @@ public class BadPacketsD extends Check implements PacketCheck {
             }
 
             if (flag) {
+                exemptVec = null;
                 flagAndAlert();
                 if (player.packetStateData.lastPacketWasTeleport || player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
                     player.getSetbackTeleportUtil().executeNonSimulatingSetback();
