@@ -70,7 +70,7 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
                     slotAbleChange = slot;
                 });
                 player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get() + 1, () -> {
-                    if (slotAbleChange != -1) {
+                    if (slotAbleChange != -1 && player.packetStateData.lastSlotSelected != slot) {
                         slotNeedChange = slot;
                     }
                     slotAbleChange = slot;
