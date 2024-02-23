@@ -7,23 +7,14 @@ import ac.grim.grimac.checks.type.PostPredictionCheck;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.update.PredictionComplete;
 import ac.grim.grimac.utils.lists.EvictingQueue;
-import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
-import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
-import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientHeldItemChange;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerFlying;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerHeldItemChange;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
-import static com.github.retrooper.packetevents.protocol.packettype.PacketType.Play.Client.*;
-
 
 // damn i mess up this
 // client usually send <=1 cpacket helditemchange every tick
@@ -31,18 +22,13 @@ import static com.github.retrooper.packetevents.protocol.packettype.PacketType.P
 
 @CheckData(name = "BadPacketsU")
 public class BadPacketsU extends Check implements PacketCheck, PostPredictionCheck {
-    private final ArrayDeque<PacketTypeCommon> post = new ArrayDeque<>();
-    // Due to 1.9+ missing the idle packet, we must queue flags
-    // 1.8 clients will have the same logic for simplicity, although it's not needed
     private final List<String> flags = new EvictingQueue<>(20);
-    private boolean sentFlying = false;
-    private int isExemptFromSwingingCheck = Integer.MIN_VALUE;
 
     public int baseChanged = 0;
     public int changed = 0;
+    public int slotAbleChange = -1;
     public int slotNeedChange = -1;
-    public boolean unsure = false;
-    public boolean taken = true;
+    public boolean exemptNext = true;
 
     public BadPacketsU(GrimPlayer playerData) {
         super(playerData);
@@ -50,18 +36,23 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
 
     @Override
     public void onPredictionComplete(final PredictionComplete predictionComplete) {
-        if (!flags.isEmpty()) {
-            // Okay, the user might be cheating, let's double check
-            // 1.8 clients have the idle packet, and this shouldn't false on 1.8 clients
-            // 1.9+ clients have predictions, which will determine if hidden tick skipping occurred
-            if (player.isTickingReliablyFor(3)) {
+        if (player.isTickingReliablyFor(3)) {
+            if (!flags.isEmpty()) {
                 for (String flag : flags) {
                     flagAndAlert(flag);
                 }
             }
-
-            flags.clear();
+            if (changed == 0) {
+                exemptNext = true;
+            }
+        } else {
+            if (changed <= 19) {
+                exemptNext = true;
+            }
         }
+        flags.clear();
+        baseChanged = 0;
+        changed = 0;
     }
 
     @Override
@@ -72,12 +63,13 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
             if (slot >= 0 && slot <= 8) {
                 player.sendTransaction();
                 player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get(), () -> {
-                    slotNeedChange = slot;
-                    unsure = true;
-                    taken = false;
+                    slotAbleChange = slot;
                 });
                 player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get() + 1, () -> {
-                    unsure = false;
+                    if (slotAbleChange != -1) {
+                        slotNeedChange = slot;
+                    }
+                    slotAbleChange = slot;
                 });
             }
         }
@@ -90,26 +82,42 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
             if (player.packetStateData.lastPacketWasTeleport || player.packetStateData.lastPacketWasOnePointSeventeenDuplicate) {
                 return;
             }
-            WrapperPlayClientPlayerFlying flying = new WrapperPlayClientPlayerFlying(event);
-            if (flying.hasPosition())
+            if (event.getPacketType() == PacketType.Play.Client.PLAYER_POSITION || event.getPacketType() == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION) {
+                flags.clear();
                 baseChanged = 0;
+            }
             changed = 0;
         } else {
-            if (isTransaction(event.getPacketType())) {
-                // latencyUtils runs after us so
-                if (changed > ((!taken || unsure) ? 1 : 2)) {
-                    flags.add("changed=" + changed);
-                }
-                changed = 0;
-            } else if (event.getPacketType() == PacketType.Play.Client.HELD_ITEM_CHANGE) {
+            if (event.getPacketType() == PacketType.Play.Client.HELD_ITEM_CHANGE) {
                 baseChanged++;
-                WrapperPlayServerHeldItemChange held = new WrapperPlayServerHeldItemChange(event);
-                if (taken && held.getSlot() == ) {
+                if (baseChanged > 40) {
+                    flagAndAlert("impossible baseChanged=" + baseChanged);
+                }
+
+                WrapperPlayClientHeldItemChange held = new WrapperPlayClientHeldItemChange(event);
+                if (held.getSlot() < 0 || held.getSlot() > 8) {
+                    flagAndAlert("invalid held slot " + held.getSlot());
+                    return;
+                }
+                if (exemptNext || held.getSlot() == slotAbleChange || held.getSlot() == slotNeedChange) {
+                    exemptNext = false;
+                    if (held.getSlot() == slotAbleChange || held.getSlot() == slotNeedChange) {
+                        slotNeedChange = -1;
+                    }
                 } else {
                     changed++;
                 }
-                if (baseChanged > 40) {
+                slotAbleChange = -1;
+                if (slotNeedChange != -1) {
+                    flagAndAlert("ignored server held_item_change");
+                    slotNeedChange = -1;
+                }
+                if (changed > 20) {
                     flagAndAlert("impossible changed=" + changed);
+                } else if (changed > 1) {
+                    // let's believe client has idle packet
+                    // if not, exempt at elsewhere
+                    flags.add("changed=" + changed);
                 }
             }
         }
