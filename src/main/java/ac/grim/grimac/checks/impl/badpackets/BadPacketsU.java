@@ -36,8 +36,8 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
 
     @Override
     public void onPredictionComplete(final PredictionComplete predictionComplete) {
-        if (slotNeedChange != -1) {
-            flagAndAlert("ignored server held_item_change");
+        if (slotNeedChange != -1 && (slotAbleChange == -1 || slotAbleChange == slotNeedChange)) {
+            flagAndAlert("ignored server held_item_change 1");
             slotNeedChange = -1;
         }
         if (player.isTickingReliablyFor(3)) {
@@ -70,10 +70,14 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
                     slotAbleChange = slot;
                 });
                 player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get() + 1, () -> {
-                    if (slotAbleChange != -1 && player.packetStateData.lastSlotSelected != slot) {
-                        slotNeedChange = slot;
+                    if (slotAbleChange != -1) {
+                        if (player.packetStateData.lastSlotSelected == slot)
+                            slotNeedChange = -1;
+                        else
+                            slotNeedChange = slot;
                     }
-                    slotAbleChange = slot;
+                    //slotAbleChange = slot;
+                    slotAbleChange = -1;
                 });
             }
         }
@@ -105,15 +109,18 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
                 }
                 if (exemptNext || held.getSlot() == slotAbleChange || held.getSlot() == slotNeedChange) {
                     exemptNext = false;
-                    if (held.getSlot() == slotAbleChange || held.getSlot() == slotNeedChange) {
+                    if (held.getSlot() == slotAbleChange) {
+                        slotAbleChange = -1;
+                        slotNeedChange = -1;
+                    }
+                    if (held.getSlot() == slotNeedChange) {
                         slotNeedChange = -1;
                     }
                 } else {
                     changed++;
                 }
-                slotAbleChange = -1;
-                if (slotNeedChange != -1) {
-                    flagAndAlert("ignored server held_item_change");
+                if (slotNeedChange != -1 && (slotAbleChange == -1 || slotAbleChange == slotNeedChange)) {
+                    flagAndAlert("ignored server held_item_change 2");
                     slotNeedChange = -1;
                 }
                 if (changed > 20) {
