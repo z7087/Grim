@@ -483,6 +483,8 @@ public class CheckManagerListener extends PacketListenerAbstract {
                 BlockPlace blockPlace = new BlockPlace(player, packet.getHand(), packet.getBlockPosition(), packet.getFace(), placedWith, getNearestHitResult(player, null, true));
                 blockPlace.setCursor(packet.getCursorPosition());
 
+                // This has been fixed in ViaBackwards 4.4.2
+                /*
                 if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_11) && player.getClientVersion().isOlderThan(ClientVersion.V_1_11)) {
                     // ViaRewind is stupid and divides the byte by 15 to get the float
                     // We must undo this to get the correct block place... why?
@@ -495,6 +497,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
                         blockPlace.setCursor(new Vector3f(trueByteX / 16f, trueByteY / 16f, trueByteZ / 16f));
                     }
                 }
+                */
 
                 if (!player.compensatedEntities.getSelf().inVehicle())
                     player.checkManager.onBlockPlace(blockPlace);
