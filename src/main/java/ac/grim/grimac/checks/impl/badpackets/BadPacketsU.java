@@ -36,8 +36,9 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
 
     @Override
     public void onPredictionComplete(final PredictionComplete predictionComplete) {
-        if (slotNeedChange != -1 && (slotAbleChange == -1 || slotAbleChange == slotNeedChange)) {
-            flagAndAlert("ignored server held_item_change 1");
+        if (slotNeedChange != -1) {
+            if (slotAbleChange == -1 || slotAbleChange == slotNeedChange)
+                flagAndAlert("ignored server held_item_change 1");
             slotNeedChange = -1;
         }
         if (player.isTickingReliablyFor(3)) {
@@ -119,8 +120,9 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
                 } else {
                     changed++;
                 }
-                if (slotNeedChange != -1 && (slotAbleChange == -1 || slotAbleChange == slotNeedChange)) {
-                    flagAndAlert("ignored server held_item_change 2");
+                if (slotNeedChange != -1) {
+                    if (slotAbleChange == -1 || slotAbleChange == slotNeedChange)
+                        flagAndAlert("ignored server held_item_change 2");
                     slotNeedChange = -1;
                 }
                 if (changed > 20) {
