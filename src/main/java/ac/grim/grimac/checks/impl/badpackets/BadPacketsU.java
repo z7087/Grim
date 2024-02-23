@@ -19,6 +19,7 @@ import java.util.List;
 // damn i mess up this
 // client usually send <=1 cpacket helditemchange every tick
 // if client got spacket helditemchange between last tick and this tick or didnt send cpacket helditemchange(not sent because of player changed its helditem itsself, not because of a spacket helditemchange) last tick, client can send <=2 cpacket helditemchange packet in this tick
+// edit: client can pick block to change helditem...  this means client can send <=2 cpacket helditemchange every tick without spacket helditemchange or other stuff
 
 @CheckData(name = "BadPacketsU")
 public class BadPacketsU extends Check implements PacketCheck, PostPredictionCheck {
@@ -28,7 +29,6 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
     public int changed = 0;
     public int slotAbleChange = -1;
     public int slotNeedChange = -1;
-    public boolean exemptNext = true;
 
     public BadPacketsU(GrimPlayer playerData) {
         super(playerData);
@@ -46,13 +46,6 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
                 for (String flag : flags) {
                     flagAndAlert(flag);
                 }
-            }
-            if (changed == 0) {
-                exemptNext = true;
-            }
-        } else {
-            if (changed <= 19) {
-                exemptNext = true;
             }
         }
         flags.clear();
@@ -108,8 +101,14 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
                     flagAndAlert("invalid held slot " + held.getSlot());
                     return;
                 }
-                if (exemptNext || held.getSlot() == slotAbleChange || held.getSlot() == slotNeedChange) {
-                    exemptNext = false;
+                changed++;
+                if (changed > 2) {
+                    // let's believe client has idle packet
+                    // if not, exempt at elsewhere
+                    flags.add("changed=" + changed);
+                }
+
+                if (held.getSlot() == slotAbleChange || held.getSlot() == slotNeedChange) {
                     if (held.getSlot() == slotAbleChange) {
                         slotAbleChange = -1;
                         slotNeedChange = -1;
@@ -117,21 +116,13 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
                     if (held.getSlot() == slotNeedChange) {
                         slotNeedChange = -1;
                     }
-                } else {
-                    changed++;
                 }
                 if (slotNeedChange != -1) {
                     if (slotAbleChange == -1 || slotAbleChange == slotNeedChange)
                         flagAndAlert("ignored server held_item_change 2");
                     slotNeedChange = -1;
                 }
-                if (changed > 20) {
-                    flagAndAlert("impossible changed=" + changed);
-                } else if (changed > 1) {
-                    // let's believe client has idle packet
-                    // if not, exempt at elsewhere
-                    flags.add("changed=" + changed);
-                }
+
             }
         }
     }
