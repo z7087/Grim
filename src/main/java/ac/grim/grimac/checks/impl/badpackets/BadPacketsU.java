@@ -36,6 +36,10 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
 
     @Override
     public void onPredictionComplete(final PredictionComplete predictionComplete) {
+        if (slotNeedChange != -1) {
+            flagAndAlert("ignored server held_item_change");
+            slotNeedChange = -1;
+        }
         if (player.isTickingReliablyFor(3)) {
             if (!flags.isEmpty()) {
                 for (String flag : flags) {
