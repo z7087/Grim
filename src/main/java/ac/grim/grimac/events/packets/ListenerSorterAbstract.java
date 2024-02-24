@@ -1,6 +1,7 @@
 package ac.grim.grimac.events.packets;
 
 import com.github.retrooper.packetevents.event.*;
+import com.github.retrooper.packetevents.netty.buffer.ByteBufHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,23 +53,29 @@ public class ListenerSorterAbstract extends PacketListenerAbstract {
 
     @Override
     public void onPacketReceive(PacketReceiveEvent event) {
+        Object buffer = event.getByteBuf();
+        int processIndex = ByteBufHelper.readerIndex(buffer);
         for (PacketListenerAbstract listener : listenerList) {
             try {
                 listener.onPacketReceive(event);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            ByteBufHelper.readerIndex(buffer, processIndex);
         }
     }
 
     @Override
     public void onPacketSend(PacketSendEvent event) {
+        Object buffer = event.getByteBuf();
+        int processIndex = ByteBufHelper.readerIndex(buffer);
         for (PacketListenerAbstract listener : listenerList) {
             try {
                 listener.onPacketSend(event);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            ByteBufHelper.readerIndex(buffer, processIndex);
         }
     }
 
