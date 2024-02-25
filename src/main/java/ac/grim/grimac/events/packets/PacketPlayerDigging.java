@@ -98,7 +98,8 @@ public class PacketPlayerDigging extends PacketListenerAbstract {
                             player.getInventory().hasItemType(ItemTypes.ARROW) ||
                             player.getInventory().hasItemType(ItemTypes.TIPPED_ARROW) ||
                             player.getInventory().hasItemType(ItemTypes.SPECTRAL_ARROW);
-                    player.packetStateData.eatingHand = place.getHand();
+                    if (player.packetStateData.slowedByUsingItem)
+                        player.packetStateData.eatingHand = hand;
                 // TODO: How do we lag compensate arrows? Mojang removed idle packet.
                 // I think we may have to cancel the bukkit event if the player isn't slowed
                 // On 1.8, it wouldn't be too bad to handle bows correctly
