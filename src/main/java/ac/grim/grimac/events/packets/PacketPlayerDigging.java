@@ -94,17 +94,17 @@ public class PacketPlayerDigging extends PacketListenerAbstract {
             // Players in survival can't use a bow without an arrow
             // Crossbow charge checked previously
             if (material == ItemTypes.BOW || material == ItemTypes.CROSSBOW) {
-                    /*player.packetStateData.slowedByUsingItem = player.gamemode == GameMode.CREATIVE ||
+                    player.packetStateData.slowedByUsingItem = player.gamemode == GameMode.CREATIVE ||
                             player.getInventory().hasItemType(ItemTypes.ARROW) ||
                             player.getInventory().hasItemType(ItemTypes.TIPPED_ARROW) ||
                             player.getInventory().hasItemType(ItemTypes.SPECTRAL_ARROW);
-                    player.packetStateData.eatingHand = place.getHand();*/
+                    player.packetStateData.eatingHand = place.getHand();
                 // TODO: How do we lag compensate arrows? Mojang removed idle packet.
                 // I think we may have to cancel the bukkit event if the player isn't slowed
                 // On 1.8, it wouldn't be too bad to handle bows correctly
                 // But on 1.9+, no idle packet and clients/servers don't agree on bow status
                 // Mojang pls fix
-                player.packetStateData.slowedByUsingItem = false;
+                //player.packetStateData.slowedByUsingItem = false;
             }
 
             // Only 1.8 and below players can block with swords
@@ -112,7 +112,7 @@ public class PacketPlayerDigging extends PacketListenerAbstract {
                 if (player.getClientVersion().isOlderThanOrEquals(ClientVersion.V_1_8))
                     player.packetStateData.slowedByUsingItem = true;
                 else if (PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_9)) // ViaVersion stuff
-                    player.packetStateData.slowedByUsingItem = false;
+                    player.packetStateData.slowedByUsingItem = true;
             }
         } else {
             player.packetStateData.slowedByUsingItem = false;
