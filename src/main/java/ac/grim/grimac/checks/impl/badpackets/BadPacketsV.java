@@ -18,20 +18,23 @@ import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPl
 
 @CheckData(name = "BadPacketsV")
 public class BadPacketsV extends Check implements PacketCheck {
+    private static final boolean legacyServer = PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_9);
+
+    private final boolean safeItemStack = player.getClientVersion().isOlderThan(ClientVersion.V_1_9);
+    // This packet is always sent at (-1, -1, -1) at (0, 0, 0) on the block
+    // except y gets wrapped?
+    private final int expectedY = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_8) ? 4095 : 255;
+
     public BadPacketsV(GrimPlayer player) {
         super(player);
     }
 
     @Override
     public void onPacketReceive(final PacketReceiveEvent event) {
-        if (event.getPacketType() == PacketType.Play.Client.PLAYER_BLOCK_PLACEMENT) {
+        if (legacyServer && event.getPacketType() == PacketType.Play.Client.PLAYER_BLOCK_PLACEMENT) {
             final WrapperPlayClientPlayerBlockPlacement packet = new WrapperPlayClientPlayerBlockPlacement(event);
             // BlockFace.OTHER is USE_ITEM for pre 1.9
-            if (packet.getFace() == BlockFace.OTHER && PacketEvents.getAPI().getServerManager().getVersion().isOlderThan(ServerVersion.V_1_9)) {
-                // This packet is always sent at (-1, -1, -1) at (0, 0, 0) on the block
-                // except y gets wrapped?
-                final int expectedY = player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_8) ? 4095 : 255;
-
+            if (packet.getFace() == BlockFace.OTHER) {
                 final Vector3i pos = packet.getBlockPosition();
                 final Vector3f cursor = packet.getCursorPosition();
                 final ItemStack item = packet.getItemStack().get();
@@ -42,7 +45,7 @@ public class BadPacketsV extends Check implements PacketCheck {
                         || cursor.getX() != 0
                         || cursor.getY() != 0
                         || cursor.getZ() != 0
-                        || item.is(ItemTypes.AIR) // never sent when not holding anything
+                        || (safeItemStack && item.is(ItemTypes.AIR)) // never sent when not holding anything
                 ) flagAndAlert();
             }
         }
