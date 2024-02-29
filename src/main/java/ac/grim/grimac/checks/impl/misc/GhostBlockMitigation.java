@@ -19,7 +19,7 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
 
     @Override
     public void onBlockPlace(final BlockPlace place) {
-        if (allow || player.bukkitPlayer == null) return;
+        if (allow || place.isCancelled() || player.bukkitPlayer == null) return;
 
         World world = player.bukkitPlayer.getWorld();
         Vector3i pos = place.getPlacedBlockPos();
@@ -39,19 +39,22 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
             for (int i = x - distance; i <= x + distance; i++) {
                 for (int j = y - distance; j <= y + distance; j++) {
                     for (int k = z - distance; k <= z + distance; k++) {
+                        /*
                         if (i == x && j == y && k == z) {
                             continue;
                         }
                         if (i == xAgainst && j == yAgainst && k == zAgainst) {
                             continue;
                         }
+                        */
                         if (!loaded && world.isChunkLoaded(x >> 4, z >> 4)) {
                             loaded = true;
-                            continue;
                         }
-                        Block type = world.getBlockAt(i, j, k);
-                        if (type.getType() != Material.AIR) {
-                            return;
+                        if (loaded) {
+                            Block type = world.getBlockAt(i, j, k);
+                            if (type.getType() != Material.AIR) {
+                                return;
+                            }
                         }
 
                     }
