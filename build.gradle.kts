@@ -29,7 +29,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.retrooper.packetevents:spigot:2.2.1")
+    implementation(files("libs/packetevents-spigot-2.2.1.jar")) 
+    //implementation("com.github.retrooper.packetevents:spigot:2.2.1")
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
     implementation("club.minnced:discord-webhooks:0.8.0") // Newer versions include kotlin-stdlib, which leads to incompatibility with plugins that use Kotlin
     implementation("it.unimi.dsi:fastutil:8.5.13")
