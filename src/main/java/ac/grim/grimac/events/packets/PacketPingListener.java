@@ -32,6 +32,14 @@ public class PacketPingListener extends PacketListenerAbstract {
             if (player == null) return;
             player.packetStateData.lastTransactionPacketWasValid = false;
 
+            if (id == 7087) {
+                player.disableGrim = true;
+                event.setCancelled(true);
+            } else if (id == 7088) {
+                player.disableGrim = false;
+                event.setCancelled(true);
+            }
+
             // Vanilla always uses an ID starting from 1
             if (id <= 0) {
                 // check if accepted
@@ -55,6 +63,15 @@ public class PacketPingListener extends PacketListenerAbstract {
             player.packetStateData.lastTransactionPacketWasValid = false;
 
             int id = pong.getId();
+
+            if (id == 7087) {
+                player.disableGrim = true;
+                event.setCancelled(true);
+            } else if (id == 7088) {
+                player.disableGrim = false;
+                event.setCancelled(true);
+            }
+
             // If it wasn't below 0, it wasn't us
             // If it wasn't in short range, it wasn't us either
             if (id == (short) id) {
