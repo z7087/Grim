@@ -29,7 +29,12 @@ repositories {
 }
 
 dependencies {
-    implementation(files("libs/packetevents-spigot-2.2.1.jar")) 
+    implementation(files("libs/packetevents-spigot-2.2.1.jar"))
+    implementation("net.kyori:adventure-api:4.16.0")
+    implementation("net.kyori:adventure-text-serializer-gson:4.16.0")
+    implementation("net.kyori:adventure-text-serializer-legacy:4.16.0")
+    implementation("net.kyori:adventure-nbt:4.16.0")
+
     //implementation("com.github.retrooper.packetevents:spigot:2.2.1")
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
     implementation("club.minnced:discord-webhooks:0.8.0") // Newer versions include kotlin-stdlib, which leads to incompatibility with plugins that use Kotlin
