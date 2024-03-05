@@ -22,11 +22,15 @@ import static com.github.retrooper.packetevents.protocol.packettype.PacketType.P
 
 public enum KeystrokeEvents {
     OUTSIDE_TICK(true) {
-        @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+        public boolean mustType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
             return packetType == PacketType.Play.Client.WINDOW_CONFIRMATION ||
                     packetType == PacketType.Play.Client.PONG ||
-                    packetType == PacketType.Play.Client.TELEPORT_CONFIRM ||
+                    packetType == PacketType.Play.Client.TELEPORT_CONFIRM;
+        }
+
+        @Override
+        public boolean isType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+            return mustType(player, packetType, event) ||
                     (player.packetStateData.lastPacketWasTeleport && (packetType == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION || packetType == PacketType.Play.Client.VEHICLE_MOVE)) ||
                     (packetType == PacketType.Play.Client.CLICK_WINDOW && player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_13));
         }
@@ -110,7 +114,7 @@ public enum KeystrokeEvents {
     END_START_TICK() {
         @Override
         public KeystrokeEvents getNext(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
-            return OUTSIDE_TICK.isType(player, packetType, event) ? OUTSIDE_TICK : OUTSIDE_TICK.getNext(player, packetType, event);
+            return OUTSIDE_TICK.mustType(player, packetType, event) ? OUTSIDE_TICK : OUTSIDE_TICK.getNext(player, packetType, event);
         }
     };
 
