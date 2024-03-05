@@ -20,125 +20,34 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 
 import static com.github.retrooper.packetevents.protocol.packettype.PacketType.Play.Client.*;
 
-public class PNSException extends RuntimeException {
-    public static final PNSException INSTANCE = new PNSException();
-}
-
-public enum KeystrokeEvents {
-    OUTSIDE_TICK(true) {
-        @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType) {
-            return isTransaction(packetType) || player.packetStateData.lastPacketWasTeleport;
-        }
-    },
-
-    UPDATE_CONTROLLER() {
-        @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType) {
-            return packetType == PacketType.Play.Client.HELD_ITEM_CHANGE;
-        }
-    },
-
-    HANDLE_SCREEN_INPUT(true) {
-        // idk how the screen handle input...
-        @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType) {
-            return packetType == PacketType.Play.Client.CLICK_WINDOW || packetType == PacketType.Play.Client.CREATIVE_INVENTORY_ACTION;
-        }
-    },
-
-    UPDATE_VEHIDLE_LOCATION() {
-        @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType) {
-            return packetType == PacketType.Play.Client.VEHICLE_MOVE;
-        }
-
-        @Override
-        public KeystrokeEvents getNext() {
-            return UPDATE_PLAYER_LOCATION.getNext();
-        }
-    },
-
-    UPDATE_SPRINT_STATE() {
-        @Override
-        public boolean isType(GrimPlayer player, PacketReceiveEvent event) {
-            if (event.getPacketType() == PacketType.Play.Client.ENTITY_ACTION) {
-                WrapperPlayClientEntityAction.Action action = (new WrapperPlayClientEntityAction(event)).getAction();
-                return action == WrapperPlayClientEntityAction.Action.START_SPRINTING || action == WrapperPlayClientEntityAction.Action.STOP_SPRINTING;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType) {
-            throwException();
-        }
-    },
-
-    UPDATE_SNEAK_STATE() {
-        @Override
-        public boolean isType(GrimPlayer player, PacketReceiveEvent event) {
-            if (event.getPacketType() == PacketType.Play.Client.ENTITY_ACTION) {
-                WrapperPlayClientEntityAction.Action action = (new WrapperPlayClientEntityAction(event)).getAction();
-                return action == WrapperPlayClientEntityAction.Action.START_SNEAKING || action == WrapperPlayClientEntityAction.Action.STOP_SNEAKING;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType) {
-            throwException();
-        }
-    },
-
-    UPDATE_PLAYER_LOCATION() {
-        @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType) {
-            return WrapperPlayClientPlayerFlying.isFlying(packetType);
-        }
-    };
-
-    protected static final KeystrokeEvents[] VALUES = values();
-
-    protected final boolean repeatable;
-
-    public KeystrokeEvents() {
-        this(false);
-    }
-
-    public KeystrokeEvents(boolean repeatable) {
-        this.repeatable = repeatable;
-    }
-
-    public boolean isRepeatable() {
-        return repeatable;
-    }
-
-    public boolean isType(GrimPlayer player, PacketReceiveEvent event) {
-        return isType(player, event.getPacketType());
-    }
-
-    public boolean isType(GrimPlayer player, PacketTypeCommon packetType) {
-        return false;
-    }
-
-    public KeystrokeEvents getNext() {
-        return VALUES[(ordinal()+1) % VALUES.length];
-    }
-
-    protected void throwException() {
-        throw PNSException.INSTANCE;
-    }
-}
 
 @CheckData(name = "KeystrokeHandler")
 public class KeystrokeHandler extends Check implements PacketCheck {
+    public KeystrokeEvents playerOn = KeystrokeEvents.OUTSIDE_TICK;
 
     public KeystrokeHandler(GrimPlayer playerData) {
         super(playerData);
     }
 
     @Override
-    public void onPacketReceive(final PacketReceiveEvent event) {
+    public void onPacketReceive(PacketReceiveEvent event) {
+        PacketTypeCommon packetType = event.getPacketType();
+        if (playerOn.isRepeatable() && playerOn.isType(player, packetType, event))
+            return;
+        checkType(packetType, event);
+    }
+
+    protected int checkType(PacketTypeCommon packetType, PacketReceiveEvent event) {
+        KeystrokeEvents playerNext = playerOn.getNext(player, packetType, event);
+        boolean isType = playerNext.isType(player, packetType, event);
+        int i = 0;
+        do {
+            if (isType)
+                break;
+            playerNext = playerNext.getNext(player, isType);
+            isType = playerNext.isType(player, packetType, event);
+        } while (++i < 300);
+        playerOn = playerNext;
+        return i;
     }
 }
