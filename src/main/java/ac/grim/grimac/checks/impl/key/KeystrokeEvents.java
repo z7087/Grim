@@ -24,7 +24,8 @@ public enum KeystrokeEvents {
     OUTSIDE_TICK(true) {
         @Override
         public boolean isType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
-            return isTransaction(packetType) ||
+            return packetType == PacketType.Play.Client.WINDOW_CONFIRMATION ||
+                    packetType == PacketType.Play.Client.PONG ||
                     packetType == PacketType.Play.Client.TELEPORT_CONFIRM ||
                     (player.packetStateData.lastPacketWasTeleport && (packetType == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION || packetType == PacketType.Play.Client.VEHICLE_MOVE)) ||
                     (packetType == PacketType.Play.Client.CLICK_WINDOW && player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_13));
@@ -73,7 +74,7 @@ public enum KeystrokeEvents {
 
         @Override
         public KeystrokeEvents getNext(GrimPlayer player, boolean type) {
-            return UPDATE_PLAYER_LOCATION.getNext();
+            return UPDATE_PLAYER_LOCATION.getNext(player, type);
         }
     },
 
@@ -120,6 +121,16 @@ public enum KeystrokeEvents {
 
     public boolean isRepeatable() {
         return repeatable;
+    }
+
+    public static boolean isExempt(GrimPlayer player, PacketReceiveEvent event) {
+        return isExempt(player, event.getPacketType(), event);
+    }
+
+    public static boolean isExempt(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+        // these packets send async
+        return packetType == PacketType.Play.Client.KEEP_ALIVE ||
+                packetType == PacketType.Play.Client.RESOURCE_PACK_STATUS;
     }
 
     public boolean isType(GrimPlayer player, PacketReceiveEvent event) {

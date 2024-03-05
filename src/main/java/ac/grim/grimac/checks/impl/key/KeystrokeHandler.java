@@ -32,8 +32,13 @@ public class KeystrokeHandler extends Check implements PacketCheck {
     @Override
     public void onPacketReceive(PacketReceiveEvent event) {
         PacketTypeCommon packetType = event.getPacketType();
+
+        if (KeystrokeEvents.isExempt(player, packetType, event))
+            return;
+
         if (playerOn.isRepeatable() && playerOn.isType(player, packetType, event))
             return;
+
         checkType(packetType, event);
     }
 
