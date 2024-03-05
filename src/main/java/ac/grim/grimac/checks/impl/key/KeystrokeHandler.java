@@ -44,13 +44,11 @@ public class KeystrokeHandler extends Check implements PacketCheck {
 
     protected int checkType(PacketTypeCommon packetType, PacketReceiveEvent event) {
         KeystrokeEvents playerNext = playerOn.getNext(player, packetType, event);
-        boolean isType = playerNext.isType(player, packetType, event);
         int i = 0;
         do {
-            if (isType)
+            if (playerNext.isType(player, packetType, event))
                 break;
-            playerNext = playerNext.getNext(player, isType);
-            isType = playerNext.isType(player, packetType, event);
+            playerNext = playerNext.getNext(player, packetType, event);
         } while (++i < 300);
         playerOn = playerNext;
         return i;

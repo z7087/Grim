@@ -61,8 +61,8 @@ public enum KeystrokeEvents {
         }
 
         @Override
-        public KeystrokeEvents getNext(GrimPlayer player, boolean type) {
-            return type ? UPDATE_VEHIDLE_POSITION : UPDATE_SPRINT_STATE;
+        public KeystrokeEvents getNext(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+            return isType(player, packetType, event) ? UPDATE_VEHIDLE_POSITION : UPDATE_SPRINT_STATE;
         }
     },
 
@@ -73,8 +73,8 @@ public enum KeystrokeEvents {
         }
 
         @Override
-        public KeystrokeEvents getNext(GrimPlayer player, boolean type) {
-            return UPDATE_PLAYER_LOCATION.getNext(player, type);
+        public KeystrokeEvents getNext(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+            return UPDATE_PLAYER_LOCATION.getNext(player, packetType, event);
         }
     },
 
@@ -104,6 +104,13 @@ public enum KeystrokeEvents {
         @Override
         public boolean isType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
             return WrapperPlayClientPlayerFlying.isFlying(packetType);
+        }
+    },
+
+    END_START_TICK() {
+        @Override
+        public KeystrokeEvents getNext(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+            return OUTSIDE_TICK.isType(player, packetType, event) ? OUTSIDE_TICK : OUTSIDE_TICK.getNext(player, packetType, event);
         }
     };
 
@@ -142,10 +149,6 @@ public enum KeystrokeEvents {
     }
 
     public KeystrokeEvents getNext(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
-        return getNext(player, false);
-    }
-
-    public KeystrokeEvents getNext(GrimPlayer player, boolean type) {
         return VALUES[(ordinal()+1) % VALUES.length];
     }
 
