@@ -22,6 +22,7 @@ import static com.github.retrooper.packetevents.protocol.packettype.PacketType.P
 
 public enum KeystrokeEvents {
     OUTSIDE_TICK(true) {
+        @Override
         public boolean mustType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
             return packetType == PacketType.Play.Client.WINDOW_CONFIRMATION ||
                     packetType == PacketType.Play.Client.PONG ||
@@ -30,7 +31,7 @@ public enum KeystrokeEvents {
 
         @Override
         public boolean isType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
-            return mustType(player, packetType, event) ||
+            return super.isType(player, packetType, event) ||
                     (player.packetStateData.lastPacketWasTeleport && (packetType == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION || packetType == PacketType.Play.Client.VEHICLE_MOVE)) ||
                     (packetType == PacketType.Play.Client.CLICK_WINDOW && player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_13));
         }
@@ -60,7 +61,7 @@ public enum KeystrokeEvents {
 
     UPDATE_VEHIDLE_INPUT() {
         @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+        public boolean mustType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
             return packetType == PacketType.Play.Client.STEER_VEHICLE;
         }
 
@@ -84,7 +85,7 @@ public enum KeystrokeEvents {
 
     UPDATE_SPRINT_STATE() {
         @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+        public boolean mustType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
             if (packetType == PacketType.Play.Client.ENTITY_ACTION) {
                 WrapperPlayClientEntityAction.Action action = (new WrapperPlayClientEntityAction(event)).getAction();
                 return action == WrapperPlayClientEntityAction.Action.START_SPRINTING || action == WrapperPlayClientEntityAction.Action.STOP_SPRINTING;
@@ -95,7 +96,7 @@ public enum KeystrokeEvents {
 
     UPDATE_SNEAK_STATE() {
         @Override
-        public boolean isType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+        public boolean mustType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
             if (packetType == PacketType.Play.Client.ENTITY_ACTION) {
                 WrapperPlayClientEntityAction.Action action = (new WrapperPlayClientEntityAction(event)).getAction();
                 return action == WrapperPlayClientEntityAction.Action.START_SNEAKING || action == WrapperPlayClientEntityAction.Action.STOP_SNEAKING;
@@ -144,12 +145,20 @@ public enum KeystrokeEvents {
                 packetType == PacketType.Play.Client.RESOURCE_PACK_STATUS;
     }
 
+    public boolean mustType(GrimPlayer player, PacketReceiveEvent event) {
+        return mustType(player, event.getPacketType(), event);
+    }
+
+    public boolean mustType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
+        return false;
+    }
+
     public boolean isType(GrimPlayer player, PacketReceiveEvent event) {
         return isType(player, event.getPacketType(), event);
     }
 
     public boolean isType(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
-        return false;
+        return mustType(player, packetType, event);
     }
 
     public KeystrokeEvents getNext(GrimPlayer player, PacketTypeCommon packetType, PacketReceiveEvent event) {
