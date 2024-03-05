@@ -110,11 +110,11 @@ public enum KeystrokeEvents {
 
     protected final boolean repeatable;
 
-    protected KeystrokeEvents() {
+    KeystrokeEvents() {
         this(false);
     }
 
-    protected KeystrokeEvents(boolean repeatable) {
+    KeystrokeEvents(boolean repeatable) {
         this.repeatable = repeatable;
     }
 
