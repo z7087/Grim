@@ -35,14 +35,14 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
             return;
         }
 
+        // If we cancelled a likely stupidity, this is the next packet, reset disablelogger
+        if (player.packetStateData._disableListenerLogger)
+            player.packetStateData._disableListenerLogger = false;
+
         // Players can send these packets async
         if (isExempt(event)) {
             return;
         }
-
-        // If we cancelled a likely stupidity, this is the next packet, reset disablelogger
-        if (player.packetStateData._disableListenerLogger)
-            player.packetStateData._disableListenerLogger = false;
 
         // We can't know the flying packet's type in 1.8-client or 1.8- server
         // 1.8- server and 1.8- client have no confirm-teleport packet
