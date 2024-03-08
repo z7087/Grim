@@ -9,6 +9,7 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
+import com.github.retrooper.packetevents.protocol.ConnectionState;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.protocol.world.BlockFace;
@@ -31,6 +32,11 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
         // Ignore resend
         if (player.packetStateData._disableLowestLogger) {
             // PacketType always PosLook here
+            return;
+        }
+
+        // Players can send these packets async
+        if (isExempt(event)) {
             return;
         }
 
@@ -135,6 +141,12 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
 
     public static boolean isSupportVersion(ClientVersion clientVer, ServerVersion serverVer) {
         return clientVer.isNewerThanOrEquals(ClientVersion.V_1_9) && serverVer.isNewerThanOrEquals(ServerVersion.V_1_9);
+    }
+
+    public static boolean isExempt(PacketReceiveEvent event) {
+        return (event.getConnectionState() != ConnectionState.PLAY) ||
+                (event.getPacketType() == PacketType.Play.Client.KEEP_ALIVE) ||
+                (event.getPacketType() == PacketType.Play.Client.RESOURCE_PACK_STATUS);
     }
 
 }
