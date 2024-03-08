@@ -144,7 +144,10 @@ public class TeleportStupidityHandler extends PacketListenerAbstract {
     }
 
     public static boolean isExempt(PacketReceiveEvent event) {
-        return (event.getConnectionState() != ConnectionState.PLAY) ||
+        // players can console spam with a pe mistake?
+        // lets check connection state twice
+        return (event.getUser().getDecoderState() != ConnectionState.PLAY) ||
+                (event.getConnectionState() != ConnectionState.PLAY) ||
                 (event.getPacketType() == PacketType.Play.Client.KEEP_ALIVE) ||
                 (event.getPacketType() == PacketType.Play.Client.RESOURCE_PACK_STATUS);
     }
