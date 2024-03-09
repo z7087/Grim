@@ -19,7 +19,11 @@ import java.util.List;
 // damn i mess up this
 // client usually send <=1 cpacket helditemchange every tick
 // if client got spacket helditemchange between last tick and this tick or didnt send cpacket helditemchange(not sent because of player changed its helditem itsself, not because of a spacket helditemchange) last tick, client can send <=2 cpacket helditemchange packet in this tick
+
 // edit: client can pick block to change helditem...  this means client can send <=2 cpacket helditemchange every tick without spacket helditemchange or other stuff
+
+// edit 2: client can pick block and mine a block to change and sync helditem so <=3 cpacket helditemchange every tick lol
+// this is trash now
 
 @CheckData(name = "BadPacketsU")
 public class BadPacketsU extends Check implements PacketCheck, PostPredictionCheck {
@@ -34,6 +38,7 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
         super(playerData);
     }
 
+    /*
     @Override
     public void onPredictionComplete(final PredictionComplete predictionComplete) {
         if (slotNeedChange != -1) {
@@ -126,4 +131,5 @@ public class BadPacketsU extends Check implements PacketCheck, PostPredictionChe
             }
         }
     }
+    */
 }
