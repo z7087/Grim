@@ -25,10 +25,9 @@ public class Baritone extends Check implements RotationCheck {
 
         // this is the logic before 284ee97
         /*
-        final float deltaPitch = Math.abs(to.getPitch() - from.getPitch());
 
         // Baritone works with small degrees, limit to 1 degrees to pick up on baritone slightly moving aim to bypass anticheats
-        if (rotationUpdate.getDeltaXRot() == 0 && deltaPitch > 0 && deltaPitch < 1 && Math.abs(to.getPitch()) != 90.0f) {
+        if (rotationUpdate.getDeltaXRot() == 0 && rotationUpdate.getDeltaYRotABS() > 0 && rotationUpdate.getDeltaYRotABS() < 1 && Math.abs(to.getPitch()) != 90.0f) {
             if (rotationUpdate.getProcessor().divisorY < GrimMath.MINIMUM_DIVISOR) {
                 verbose++;
                 if (verbose > 8) {
@@ -40,7 +39,7 @@ public class Baritone extends Check implements RotationCheck {
         }
         */
 
-        // and this is how that code work in fact
+        // and this is how was that code work in fact
         /*
         if (rotationUpdate.getDeltaXRot() == 0 && rotationUpdate.getDeltaXRotABS() > 0 && rotationUpdate.getDeltaXRotABS() < 1 && Math.abs(to.getYaw()) != 90.0f) {
             if (rotationUpdate.getProcessor().divisorY < GrimMath.MINIMUM_DIVISOR) {
