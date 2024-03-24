@@ -15,6 +15,7 @@ import ac.grim.grimac.checks.impl.groundspoof.NoFallA;
 import ac.grim.grimac.checks.impl.misc.ClientBrand;
 import ac.grim.grimac.checks.impl.misc.FastBreak;
 import ac.grim.grimac.checks.impl.misc.GhostBlockMitigation;
+import ac.grim.grimac.checks.impl.misc.PingSpoof;
 import ac.grim.grimac.checks.impl.misc.TransactionOrder;
 import ac.grim.grimac.checks.impl.movement.*;
 import ac.grim.grimac.checks.impl.post.PostCheck;
@@ -88,6 +89,7 @@ public class CheckManager {
                 .put(BadPacketsT.class, new BadPacketsT(player))
                 .put(InvalidPlace.class, new InvalidPlace(player))
                 .put(FastBreak.class, new FastBreak(player))
+                .put(PingSpoof.class, new PingSpoof(player))
                 .put(TransactionOrder.class, new TransactionOrder(player))
                 .put(NoSlowB.class, new NoSlowB(player))
                 .put(SetbackBlocker.class, new SetbackBlocker(player)) // Must be last class otherwise we can't check while blocking packets
