@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 // lets hope bundle wont break this :)
 @CheckData(name = "PingSpoof")
 public class PingSpoof extends Check implements PacketCheck {
-    private static final long TIMED_OUT_IF_PASSED = 60e9;
+    private static final long TIMED_OUT_IF_PASSED = 60 * (1000 * 1000);
     Queue<Pair<Long, Long>> keepaliveMap = new ConcurrentLinkedQueue<>();
     long keepAliveClock = -1;
 
