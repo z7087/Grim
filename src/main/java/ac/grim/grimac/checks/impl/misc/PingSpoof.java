@@ -23,6 +23,9 @@ public class PingSpoof extends Check implements PacketCheck {
     Queue<Pair<Long, Long>> keepaliveMap = new ConcurrentLinkedQueue<>();
     long keepAliveClock = -1;
 
+    // why playerClockAtLeast is System.nanoTime() by default?
+    boolean state = false;
+
     public PingSpoof(GrimPlayer player) {
         super(player);
     }
@@ -37,7 +40,7 @@ public class PingSpoof extends Check implements PacketCheck {
 
     @Override
     public void onPacketReceive(PacketReceiveEvent event) {
-        if (event.getPacketType() == PacketType.Play.Client.KEEP_ALIVE) {
+        if (event.getPacketType() == PacketType.Play.Client.KEEP_ALIVE && state) {
             WrapperPlayClientKeepAlive packet = new WrapperPlayClientKeepAlive(event);
 
             long id = packet.getId();
@@ -82,6 +85,7 @@ public class PingSpoof extends Check implements PacketCheck {
             }
         }
         if (player.packetStateData.lastTransactionPacketWasValid && isTransaction(event.getPacketType())) {
+            state = true;
             if (keepAliveClock != -1 && System.nanoTime() - keepAliveClock >= 60e9) {
                 player.timedOut();
                 return;
