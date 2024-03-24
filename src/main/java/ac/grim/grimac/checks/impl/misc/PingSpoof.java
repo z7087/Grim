@@ -82,7 +82,7 @@ public class PingSpoof extends Check implements PacketCheck {
             }
         }
         if (player.packetStateData.lastTransactionPacketWasValid && isTransaction(event.getPacketType())) {
-            if (keepAliveClock != -1 && player.getPlayerClockAtLeast() - keepAliveClock >= 60e9) {
+            if (keepAliveClock != -1 && System.nanoTime() - keepAliveClock >= 60e9) {
                 player.timedOut();
                 return;
             }
