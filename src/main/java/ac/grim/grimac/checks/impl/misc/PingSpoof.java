@@ -2,6 +2,7 @@ package ac.grim.grimac.checks.impl.misc;
 
 import ac.grim.grimac.checks.Check;
 import ac.grim.grimac.checks.CheckData;
+import ac.grim.grimac.checks.impl.badpackets.BadPacketsO;
 import ac.grim.grimac.checks.type.PacketCheck;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.data.Pair;
@@ -20,8 +21,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 // lets hope bundle wont break this :)
 @CheckData(name = "PingSpoof")
 public class PingSpoof extends Check implements PacketCheck {
-    // keepAlive is async to client thread, so i think lower is safe (or not if client gc for 50s)
-    private static final long TIMED_OUT_IF_PASSED = 45 * (1000 * 1000);
+    // keepAlive is async to client thread, so i think lower is safe (or not if client gc for 30s)
+    private static final long TIMED_OUT_IF_PASSED = 30 * (1000 * 1000);
     Queue<Pair<Long, Long>> keepaliveMap = new ConcurrentLinkedQueue<>();
     long keepAliveClock = -1;
 
@@ -64,25 +65,23 @@ public class PingSpoof extends Check implements PacketCheck {
                     data = keepaliveMap.poll();
                 } while (data != null && data.getFirst() != id);
 
-                // wtf this for?
-                if (System.currentTimeMillis() - player.joinTime <= 5000)
-                    return;
-
                 if (System.nanoTime() - keepAliveClock >= TIMED_OUT_IF_PASSED) {
                     player.timedOut();
                     return;
                 }
 
+                // idk what the jointime check for but transaction handler has this
                 // if we sent keepalive packet A and transaction packet B, and the player replys B before A, then we can know the player is spoofing keepalive ping
-                if (state && player.getPlayerClockAtLeast() > keepAliveClock) {
+                if (state && System.currentTimeMillis() - player.joinTime <= 5000 && player.getPlayerClockAtLeast() > keepAliveClock) {
                     if (flag())
                         alert(String.format("diff: %.5f", (double)(player.getPlayerClockAtLeast() - keepAliveClock) / 1.0e9));
                 }
                 // do we flag twice?
                 else if (skipped > 0) {
-                    if (flag())
-                        alert("skipped: " + skipped);
+                    flagAndAlert("skipped: " + skipped);
                 }
+            } else {
+                player.checkManager.getPacketCheck(BadPacketsO.class).flagAndAlert("ID: " + id);
             }
         }
         if (player.packetStateData.lastTransactionPacketWasValid && isTransaction(event.getPacketType())) {
