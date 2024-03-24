@@ -74,8 +74,8 @@ public class PingSpoof extends Check implements PacketCheck {
                 }
 
                 // if we sent keepalive packet A and transaction packet B, and the player replys B before A, then we can know the player is spoofing keepalive ping
-                if (player.getPlayerClockAtLeast() > keepAliveClock) {
-                    if (state && flag())
+                if (state && player.getPlayerClockAtLeast() > keepAliveClock) {
+                    if (flag())
                         alert(String.format("diff: %.5f", (double)(player.getPlayerClockAtLeast() - keepAliveClock) / 1.0e9));
                 }
                 // do we flag twice?
