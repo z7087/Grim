@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 // lets hope bundle wont break this :)
 @CheckData(name = "PingSpoof")
 public class PingSpoof extends Check implements PacketCheck {
-    // keepAlive is async to client thread, so i think lower is safe (or client gc for 50s?)
+    // keepAlive is async to client thread, so i think lower is safe (or not if client gc for 50s)
     private static final long TIMED_OUT_IF_PASSED = 45 * (1000 * 1000);
     Queue<Pair<Long, Long>> keepaliveMap = new ConcurrentLinkedQueue<>();
     long keepAliveClock = -1;
@@ -68,7 +68,6 @@ public class PingSpoof extends Check implements PacketCheck {
                 if (System.currentTimeMillis() - player.joinTime <= 5000)
                     return;
 
-                // timeout player after 60s
                 if (System.nanoTime() - keepAliveClock >= TIMED_OUT_IF_PASSED) {
                     player.timedOut();
                     return;
