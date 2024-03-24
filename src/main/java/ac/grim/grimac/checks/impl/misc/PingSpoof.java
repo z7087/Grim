@@ -40,7 +40,7 @@ public class PingSpoof extends Check implements PacketCheck {
 
     @Override
     public void onPacketReceive(PacketReceiveEvent event) {
-        if (event.getPacketType() == PacketType.Play.Client.KEEP_ALIVE && state) {
+        if (event.getPacketType() == PacketType.Play.Client.KEEP_ALIVE) {
             WrapperPlayClientKeepAlive packet = new WrapperPlayClientKeepAlive(event);
 
             long id = packet.getId();
@@ -74,7 +74,7 @@ public class PingSpoof extends Check implements PacketCheck {
 
                 // if we sent keepalive packet A and transaction packet B, and the player replys B before A, then we can know the player is spoofing keepalive ping
                 if (player.getPlayerClockAtLeast() > keepAliveClock) {
-                    if (flag())
+                    if (state && flag())
                         alert(String.format("diff: %.2f", (double)(player.getPlayerClockAtLeast() - keepAliveClock) / 1.0e9));
                 }
                 // do we flag twice?
