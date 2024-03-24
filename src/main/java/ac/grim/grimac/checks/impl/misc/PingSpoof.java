@@ -62,14 +62,21 @@ public class PingSpoof extends Check implements PacketCheck {
                     return;
 
                 // timeout player after 60s
-                if (System.nanoTime() - keepAliveClock >= 60e9)
+                if (System.nanoTime() - keepAliveClock >= 60e9) {
                     player.timedOut();
+                    return;
+                }
+
                 // if we sent keepalive packet A and transaction packet B, and the player replys B before A, then we can know the player is spoofing keepalive ping
-                else if (player.getPlayerClockAtLeast() > keepAliveClock)
-                    flagAndAlert("diff: " + (player.getPlayerClockAtLeast() - keepAliveClock));
+                if (player.getPlayerClockAtLeast() > keepAliveClock) {
+                    if (flag())
+                        alert(String.format("diff: %.2f", (double)(player.getPlayerClockAtLeast() - keepAliveClock) / 1.0e9));
+                }
                 // do we flag twice?
-                else if (skipped > 0)
-                    flagAndAlert("skipped: " + skipped);
+                else if (skipped > 0) {
+                    if (flag())
+                        alert("skipped: " + skipped);
+                }
             }
         }
         if (event.getPacketType() == PacketType.Play.Client.WINDOW_CONFIRMATION && player.packetStateData.lastTransactionPacketWasValid) {
@@ -79,8 +86,10 @@ public class PingSpoof extends Check implements PacketCheck {
             }
             Pair<Long, Long> firstData = keepaliveMap.peek();
             // if we sent keepalive packet A and transaction packet B, and the player replys B and didnt reply A, then we can know the player is spoofing keepalive ping
-            if (firstData != null && player.getPlayerClockAtLeast() > firstData.getSecond())
-                flagAndAlert("diff: " + (player.getPlayerClockAtLeast() - firstData.getSecond()));
+            if (firstData != null && player.getPlayerClockAtLeast() > firstData.getSecond()) {
+                if (flag())
+                    alert(String.format("diff: %.2f", (double)(player.getPlayerClockAtLeast() - firstData.getSecond()) / 1.0e9));
+            }
         }
     }
 }
