@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 // this check can and only can check keepalive pingspoof
 // transaction is sync to client thread, and client thread can freeze by many ways
+// not stable enough with other anticheats that send transaction
 @CheckData(name = "PingSpoof")
 public class PingSpoof extends Check implements PacketCheck {
     Queue<Pair<Long, Long>> keepaliveMap = new ConcurrentLinkedQueue<>();
@@ -79,7 +80,7 @@ public class PingSpoof extends Check implements PacketCheck {
                 }
             }
         }
-        if (event.getPacketType() == PacketType.Play.Client.WINDOW_CONFIRMATION && player.packetStateData.lastTransactionPacketWasValid) {
+        if (player.packetStateData.lastTransactionPacketWasValid && isTransaction(event.getPacketType())) {
             if (keepAliveClock != -1 && System.nanoTime() - keepAliveClock >= 60e9) {
                 player.timedOut();
                 return;
