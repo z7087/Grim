@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 // this check can and only can check keepalive pingspoof
 // transaction is sync to client thread, and client thread can freeze by many ways
 // not stable enough with other anticheats that send transaction
+// lets hope bundle wont break this :)
 @CheckData(name = "PingSpoof")
 public class PingSpoof extends Check implements PacketCheck {
     Queue<Pair<Long, Long>> keepaliveMap = new ConcurrentLinkedQueue<>();
