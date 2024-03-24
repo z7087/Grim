@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 // lets hope bundle wont break this :)
 @CheckData(name = "PingSpoof")
 public class PingSpoof extends Check implements PacketCheck {
+    private static final long TIMED_OUT_IF_PASSED = 60e9;
     Queue<Pair<Long, Long>> keepaliveMap = new ConcurrentLinkedQueue<>();
     long keepAliveClock = -1;
 
@@ -67,7 +68,7 @@ public class PingSpoof extends Check implements PacketCheck {
                     return;
 
                 // timeout player after 60s
-                if (System.nanoTime() - keepAliveClock >= 60e9) {
+                if (System.nanoTime() - keepAliveClock >= TIMED_OUT_IF_PASSED) {
                     player.timedOut();
                     return;
                 }
@@ -75,7 +76,7 @@ public class PingSpoof extends Check implements PacketCheck {
                 // if we sent keepalive packet A and transaction packet B, and the player replys B before A, then we can know the player is spoofing keepalive ping
                 if (player.getPlayerClockAtLeast() > keepAliveClock) {
                     if (state && flag())
-                        alert(String.format("diff: %.2f", (double)(player.getPlayerClockAtLeast() - keepAliveClock) / 1.0e9));
+                        alert(String.format("diff: %.5f", (double)(player.getPlayerClockAtLeast() - keepAliveClock) / 1.0e9));
                 }
                 // do we flag twice?
                 else if (skipped > 0) {
@@ -86,7 +87,7 @@ public class PingSpoof extends Check implements PacketCheck {
         }
         if (player.packetStateData.lastTransactionPacketWasValid && isTransaction(event.getPacketType())) {
             state = true;
-            if (keepAliveClock != -1 && System.nanoTime() - keepAliveClock >= 60e9) {
+            if (keepAliveClock != -1 && System.nanoTime() - keepAliveClock >= TIMED_OUT_IF_PASSED) {
                 player.timedOut();
                 return;
             }
@@ -94,7 +95,7 @@ public class PingSpoof extends Check implements PacketCheck {
             // if we sent keepalive packet A and transaction packet B, and the player replys B and didnt reply A, then we can know the player is spoofing keepalive ping
             if (firstData != null && player.getPlayerClockAtLeast() > firstData.getSecond()) {
                 if (flag())
-                    alert(String.format("diff: %.2f", (double)(player.getPlayerClockAtLeast() - firstData.getSecond()) / 1.0e9));
+                    alert(String.format("diff: %.5f", (double)(player.getPlayerClockAtLeast() - firstData.getSecond()) / 1.0e9));
             }
         }
     }
