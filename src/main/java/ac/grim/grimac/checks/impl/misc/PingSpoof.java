@@ -12,8 +12,8 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientKeepAlive;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerKeepAlive;
 
+import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 // this check can and only can check keepalive pingspoof
 // transaction is sync to client thread, and client thread can freeze by many ways
@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class PingSpoof extends Check implements PacketCheck {
     // keepAlive is async to client thread, so i think lower is safe (or not if client gc for 30s)
     private static final long TIMED_OUT_IF_PASSED = 30 * (1000 * 1000);
-    Queue<Pair<Long, Long>> keepaliveMap = new ConcurrentLinkedQueue<>();
+    Queue<Pair<Long, Long>> keepaliveMap = new LinkedList<>();
     long keepAliveClock = -1;
 
     // why playerClockAtLeast is System.nanoTime() by default?
