@@ -42,7 +42,7 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
                         // need optimize
                         for (int i = Math.max(xnd, ic << 4), xe = Math.min(xpd, (ic << 4) + 15); i <= xe; ++i) {
                             int xd = Math.abs(x - i);
-                            for (int j = ynd + id, ye = ypd - id; j <= ye; ++j) {
+                            for (int j = ynd + xd, ye = ypd - xd; j <= ye; ++j) {
                                 int xyd = xd + Math.abs(y - j);
                                 for (int k = Math.max(znd + xyd, kc << 4), ze = Math.min(zpd - xyd, (kc << 4) + 15); k <= ze; ++k) {
                                    Block type = world.getBlockAt(i, j, k);
