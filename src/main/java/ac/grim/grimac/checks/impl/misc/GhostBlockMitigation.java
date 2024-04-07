@@ -39,7 +39,8 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
             for (int ic = xnd >> 4, xec = xpd >> 4; ic <= xec; ++ic) {
                 for (int kc = znd >> 4, zec = zpd >> 4; kc <= zec; ++kc) {
                     if (world.isChunkLoaded(ic, kc)) {
-                        // need optimize
+                        // idk if it can optimize but seems good enough
+                        // maybe change to bfs?
                         for (int i = Math.max(xnd, ic << 4), xe = Math.min(xpd, (ic << 4) + 15); i <= xe; ++i) {
                             int xd = Math.abs(x - i);
                             for (int j = ynd + xd, ye = ypd - xd; j <= ye; ++j) {
