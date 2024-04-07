@@ -31,21 +31,21 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
         if (Math.pow(x - (int) player.x, 2) + Math.pow(y - (int) player.y, 2) + Math.pow(z - (int) player.z, 2) > 400)
             return;
 
-        int xnd = x - distance; int xpd = x + distance;
-        int ynd = y - distance; int ypd = y + distance;
-        int znd = z - distance; int zpd = z + distance;
+        int dxn = x - distance; int dxp = x + distance;
+        int dyn = y - distance; int dyp = y + distance;
+        int dzn = z - distance; int dzp = z + distance;
 
         try {
-            for (int ic = xnd >> 4, xec = xpd >> 4; ic <= xec; ++ic) {
-                for (int kc = znd >> 4, zec = zpd >> 4; kc <= zec; ++kc) {
+            for (int ic = dxn >> 4, ice = dxp >> 4; ic <= ice; ++ic) {
+                for (int kc = dzn >> 4, kce = dzp >> 4; kc <= kce; ++kc) {
                     if (world.isChunkLoaded(ic, kc)) {
                         // idk if it can optimize but seems good enough
                         // maybe change to bfs?
-                        for (int i = Math.max(xnd, ic << 4), xe = Math.min(xpd, (ic << 4) + 15); i <= xe; ++i) {
-                            int xd = Math.abs(x - i);
-                            for (int j = ynd + xd, ye = ypd - xd; j <= ye; ++j) {
-                                int xyd = xd + Math.abs(y - j);
-                                for (int k = Math.max(znd + xyd, kc << 4), ze = Math.min(zpd - xyd, (kc << 4) + 15); k <= ze; ++k) {
+                        for (int i = Math.max(dxn, ic << 4), ie = Math.min(dxp, (ic << 4) + 15); i <= ie; ++i) {
+                            int dx = Math.abs(x - i);
+                            for (int j = dyn + dx, je = dyp - dx; j <= je; ++j) {
+                                int dxy = dx + Math.abs(y - j);
+                                for (int k = Math.max(dzn + dxy, kc << 4), ke = Math.min(dzp - dxy, (kc << 4) + 15); k <= ke; ++k) {
                                    Block type = world.getBlockAt(i, j, k);
                                    if (type.getType() != Material.AIR) {
                                        return;
