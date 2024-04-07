@@ -22,45 +22,39 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
         if (allow || place.isCancelled() || player.bukkitPlayer == null) return;
 
         World world = player.bukkitPlayer.getWorld();
-        Vector3i pos = place.getPlacedBlockPos();
-        Vector3i posAgainst = place.getPlacedAgainstBlockLocation();
+        Vector3i pos = place.getPlacedAgainstBlockLocation();
 
         int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();
 
-        int xAgainst = posAgainst.getX();
-        int yAgainst = posAgainst.getY();
-        int zAgainst = posAgainst.getZ();
+        if (Math.pow(x - (int) player.x, 2) + Math.pow(y - (int) player.y, 2) + Math.pow(z - (int) player.z, 2) > 400)
+            return;
 
-        boolean loaded = false;
+        int xnd = x - distance; int xpd = x + distance;
+        int ynd = y - distance; int ypd = y + distance;
+        int znd = z - distance; int zpd = z + distance;
 
         try {
-            for (int i = x - distance; i <= x + distance; i++) {
-                for (int j = y - distance; j <= y + distance; j++) {
-                    for (int k = z - distance; k <= z + distance; k++) {
-                        /*
-                        if (i == x && j == y && k == z) {
-                            continue;
-                        }
-                        if (i == xAgainst && j == yAgainst && k == zAgainst) {
-                            continue;
-                        }
-                        */
-                        if (!loaded && world.isChunkLoaded(x >> 4, z >> 4)) {
-                            loaded = true;
-                        }
-                        if (loaded) {
-                            Block type = world.getBlockAt(i, j, k);
-                            if (type.getType() != Material.AIR) {
-                                return;
+            for (int ic = xnd >> 4, xec = xpd >> 4; ic <= xec; ++ic) {
+                for (int kc = znd >> 4, zec = zpd >> 4; kc <= zec; ++kc) {
+                    if (world.isChunkLoaded(ic, kc)) {
+                        // need optimize
+                        for (int i = Math.max(xnd, ic << 4), xe = Math.min(xpd, (ic << 4) + 15); i <= xe; ++i) {
+                            int xd = Math.abs(x - i);
+                            for (int j = ynd + id, ye = ypd - id; j <= ye; ++j) {
+                                int xyd = xd + Math.abs(y - j);
+                                for (int k = Math.max(znd + xyd, kc << 4), ze = Math.min(zpd - xyd, (kc << 4) + 15); k <= ze; ++k) {
+                                   Block type = world.getBlockAt(i, j, k);
+                                   if (type.getType() != Material.AIR) {
+                                       return;
+                                   }
+                                }
                             }
                         }
-
                     }
                 }
             }
-
             place.resync();
         } catch (Exception ignored) {
         }
