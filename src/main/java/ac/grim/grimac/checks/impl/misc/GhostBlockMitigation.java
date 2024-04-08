@@ -41,11 +41,15 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
                     if (world.isChunkLoaded(ic, kc)) {
                         // idk if it can optimize but seems good enough
                         // maybe change to bfs?
-                        for (int i = Math.max(dxn, ic << 4), ie = Math.min(dxp, (ic << 4) + 15); i <= ie; ++i) {
+                        int xs = ic << 4;
+                        int xe = xs + 15;
+                        int zs = kc << 4;
+                        int ze = zs + 15;
+                        for (int i = Math.max(dxn, xs), ie = Math.min(dxp, xe); i <= ie; ++i) {
                             int dx = Math.abs(x - i);
                             for (int j = dyn + dx, je = dyp - dx; j <= je; ++j) {
                                 int dxy = dx + Math.abs(y - j);
-                                for (int k = Math.max(dzn + dxy, kc << 4), ke = Math.min(dzp - dxy, (kc << 4) + 15); k <= ke; ++k) {
+                                for (int k = Math.max(dzn + dxy, zs), ke = Math.min(dzp - dxy, ze); k <= ke; ++k) {
                                    Block type = world.getBlockAt(i, j, k);
                                    if (type.getType() != Material.AIR) {
                                        return;
