@@ -22,7 +22,7 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
         if (allow || place.isCancelled() || player.bukkitPlayer == null) return;
 
         World world = player.bukkitPlayer.getWorld();
-        Vector3i pos = place.getPlacedAgainstBlockLocation();
+        Vector3i pos = place.getPlacedBlockPos();
 
         int x = pos.getX();
         int y = pos.getY();
@@ -68,8 +68,12 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
     public void reload() {
         super.reload();
         allow = getConfig().getBooleanElse("exploit.allow-building-on-ghostblocks", true);
-        distance = getConfig().getIntElse("exploit.distance-to-check-for-ghostblocks", 2);
+        distance = clamp(getConfig().getIntElse("exploit.distance-to-check-for-ghostblocks", 2), 1, 7);
+    }
 
-        if (distance < 2 || distance > 4) distance = 2;
+    private static int clamp(int i, int min, int max) {
+        if (i < min)
+            return min;
+        return Math.min(i, max);
     }
 }
