@@ -42,10 +42,9 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
                         // idk if it can optimize but seems good enough
                         // maybe change to bfs?
                         int xs = ic << 4;
-                        int xe = xs + 15;
                         int zs = kc << 4;
                         int ze = zs + 15;
-                        for (int i = Math.max(dxn, xs), ie = Math.min(dxp, xe); i <= ie; ++i) {
+                        for (int i = Math.max(dxn, xs), ie = Math.min(dxp, xs + 15); i <= ie; ++i) {
                             int dx = Math.abs(x - i);
                             for (int j = dyn + dx, je = dyp - dx; j <= je; ++j) {
                                 int dxy = dx + Math.abs(y - j);
