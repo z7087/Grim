@@ -28,6 +28,11 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
         int y = pos.getY();
         int z = pos.getZ();
 
+        if (!player.compensatedWorld.isChunkLoaded(x >> 4, z >> 4)) {
+            place.resync();
+            return;
+        }
+
         if (Math.pow(x - (int) player.x, 2) + Math.pow(y - (int) player.y, 2) + Math.pow(z - (int) player.z, 2) > 400)
             return;
 
