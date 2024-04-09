@@ -28,11 +28,6 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
         int y = pos.getY();
         int z = pos.getZ();
 
-        if (!player.compensatedWorld.isChunkLoaded(x >> 4, z >> 4)) {
-            place.resync();
-            return;
-        }
-
         if (Math.pow(x - (int) player.x, 2) + Math.pow(y - (int) player.y, 2) + Math.pow(z - (int) player.z, 2) > 400)
             return;
 
@@ -43,7 +38,7 @@ public class GhostBlockMitigation extends BlockPlaceCheck {
         try {
             for (int ic = dxn >> 4, ice = dxp >> 4; ic <= ice; ++ic) {
                 for (int kc = dzn >> 4, kce = dzp >> 4; kc <= kce; ++kc) {
-                    if (world.isChunkLoaded(ic, kc)) {
+                    if (player.compensatedWorld.isChunkLoaded(ic, kc) && world.isChunkLoaded(ic, kc)) {
                         // idk if it can optimize but seems good enough
                         // maybe change to bfs?
                         int xs = ic << 4;
